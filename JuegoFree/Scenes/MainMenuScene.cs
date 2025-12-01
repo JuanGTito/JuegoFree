@@ -11,7 +11,6 @@ namespace JuegoFree.Scenes
             container.Controls.Clear();
             container.BackColor = Color.DimGray;
 
-            // --- 1. Título ---
             Label title = new Label
             {
                 Text = "JUEGO DE AVIONES",
@@ -22,7 +21,6 @@ namespace JuegoFree.Scenes
             title.Location = new Point((container.Width - title.Width) / 2, 50);
             container.Controls.Add(title);
 
-            // --- 2. Botones del Menú ---
             int buttonWidth = 200;
             int buttonHeight = 50;
             int startY = container.Height / 2 - (buttonHeight * 2);

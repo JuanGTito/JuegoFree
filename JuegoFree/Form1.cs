@@ -53,13 +53,11 @@ namespace JuegoFree
             InputManager.SetKeyUp(e.KeyCode);
         }
 
-        // Nuevo método para cambiar de escena
         public void LoadGameScene()
         {
             // Marcamos que el juego está activo
             IsGameActive = true;
 
-            // Enviamos el contenedor y la referencia al Formulario para que la escena pueda inicializar las naves/corazones
             Scenes.GameScene.Escenario(contiene, this, 1);
         }
 
