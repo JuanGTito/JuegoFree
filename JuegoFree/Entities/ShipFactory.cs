@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using JuegoFree.Core;
+using JuegoFree.Properties;
 
 namespace JuegoFree.Entities
 {
@@ -364,123 +365,159 @@ namespace JuegoFree.Entities
 
         public static void CreateShip(PictureBox Avion, int AngRotar, int Tipox, Color Pintar, int Vida)
         {
-            int largoN = 2;
-            int anchoN = 2;
+            int largoN = 1;
+            int anchoN = 1;
+            const int IMG_ORIGINAL_WIDTH = 347;
+            const int IMG_ORIGINAL_HEIGHT = 470;
             Point[] selectedNavePoints = null;
-
-            GraphicsPath ObjGrafico = new GraphicsPath();
 
             if (Tipox == 1)
             {
-                // Asumiendo que myNave1 fue previamente escalado a 69x80
                 largoN = 80;
                 anchoN = 69;
                 selectedNavePoints = myNave1;
             }
             else if (Tipox == 2)
             {
-                // NOTA: Ajustar estos tamaños para que el polígono quepa.
                 largoN = 50;
                 anchoN = 50;
                 selectedNavePoints = myNave2;
             }
             else if (Tipox == 3)
             {
-                // NOTA: Ajustar estos tamaños para que el polígono quepa.
                 largoN = 51;
                 anchoN = 305;
                 selectedNavePoints = myNave3;
             }
+            Avion.Tag = Vida;
 
             if (selectedNavePoints != null)
             {
-                Point[] myNave = new Point[selectedNavePoints.Count()];
-                for (int i = 0; i < selectedNavePoints.Count(); i++)
+                Point[] myNave = new Point[selectedNavePoints.Length];
+                for (int i = 0; i < selectedNavePoints.Length; i++)
                 {
                     myNave[i].X = selectedNavePoints[i].X;
                     if (AngRotar == 180)
-                        myNave[i].Y = largoN - selectedNavePoints[i].Y; // Inversión Y
+                        myNave[i].Y = largoN - 1 - selectedNavePoints[i].Y;
                     else
                         myNave[i].Y = selectedNavePoints[i].Y;
                 }
+
+                GraphicsPath ObjGrafico = new GraphicsPath();
                 ObjGrafico.AddPolygon(myNave);
 
-                // Configuración de la PictureBox
                 Avion.Size = new Size(anchoN, largoN);
                 Avion.Region = new Region(ObjGrafico);
                 Avion.Location = new Point(0, 0);
 
-                // --- RELLENAR EL POLÍGONO EN EL BITMAP ---
                 Bitmap Imagen = new Bitmap(Avion.Width, Avion.Height);
                 using (Graphics PintaImg = Graphics.FromImage(Imagen))
                 {
                     PintaImg.Clear(Color.Transparent);
-                    using (SolidBrush rellenoBrush = new SolidBrush(Pintar))
+
+                    float scaleX = (float)anchoN / IMG_ORIGINAL_WIDTH;
+                    float scaleY = (float)largoN / IMG_ORIGINAL_HEIGHT;
+                    if (Tipox == 1 && Resources.Nave1Texture != null)
                     {
-                        PintaImg.FillPolygon(rellenoBrush, myNave);
+                        using (Image textureImage = Resources.Nave1Texture)
+                        using (TextureBrush textureBrush = new TextureBrush(textureImage, WrapMode.Tile))
+                        {
+                            // ** LÍNEA DE CÓDIGO AÑADIDA / CORREGIDA **
+                            // Esto reduce la imagen de 433x576 al tamaño del PictureBox (69x80) antes de rellenar.
+                            textureBrush.ScaleTransform(scaleX, scaleY);
+
+                            PintaImg.FillPolygon(textureBrush, myNave);
+                        }
+                    }
+                    // Opción B: Rellenar con Color Sólido
+                    else
+                    {
+                        using (SolidBrush rellenoBrush = new SolidBrush(Pintar))
+                        {
+                            PintaImg.FillPolygon(rellenoBrush, myNave);
+                        }
                     }
                 }
                 Avion.Image = Imagen;
             }
-
-            Avion.Tag = Vida;
             Avion.Visible = true;
         }
 
         //-------------EFECTOS DE LA NAVE PRINCIPAL-------------//
         public static void ShipRun(PictureBox Avion, int AngRotar, int velox)
         {
+            // 1. Obtener la imagen base (sin efectos)
             Bitmap ImagenBase = (Avion.Image as Bitmap);
-            if (ImagenBase == null || ImagenBase.Width != Avion.Width || ImagenBase.Height != Avion.Height)
+            if (ImagenBase == null)
             {
-                // Nota: Esto debería ser manejado llamando CreateShip si es necesario, 
-                // pero por ahora solo prevenimos un error.
+                // Si no hay imagen base (posiblemente CreateShip falló o no se llamó), salimos.
                 return;
             }
+
+            // Creamos una nueva imagen para dibujar los efectos encima.
             Bitmap ImagenConEfectos = new Bitmap(Avion.Width, Avion.Height);
 
             using (Graphics PintaImg = Graphics.FromImage(ImagenConEfectos))
             {
+                // Dibujar la nave base (sin rotar)
                 PintaImg.DrawImage(ImagenBase, new Point(0, 0));
 
-                //Puntos de Efectos de la Nave
-
+                // Puntos de Efectos de la Nave (Asumo que son de la Nave Tipo 1)
                 Point[] puntoDer = { new Point(35, 28), new Point(35, 30), new Point(36, 30), new Point(37, 31),
-                    new Point(37, 37), new Point(38, 38), new Point(38, 40), new Point(39, 41), new Point(39, 44), new Point(40, 45),
-                    new Point(40, 46), new Point(42, 48), new Point(43, 48), new Point(44, 49), new Point(44, 64), new Point(43, 65),
-                    new Point(42, 65), new Point(41, 66), new Point(40, 66), new Point(38, 68), new Point(36, 68), new Point(36, 69),
-                    new Point(36, 63), new Point(35, 62), new Point(35, 28) };
+                new Point(37, 37), new Point(38, 38), new Point(38, 40), new Point(39, 41), new Point(39, 44), new Point(40, 45),
+                new Point(40, 46), new Point(42, 48), new Point(43, 48), new Point(44, 49), new Point(44, 64), new Point(43, 65),
+                new Point(42, 65), new Point(41, 66), new Point(40, 66), new Point(38, 68), new Point(36, 68), new Point(36, 69),
+                new Point(36, 63), new Point(35, 62), new Point(35, 28) };
                 Point[] puntoIzq = { new Point(23,28), new Point(23,30), new Point(22,30), new Point(21,31), new Point(21,37),
-                    new Point(20,36), new Point(20,40), new Point(19,41), new Point(19,44), new Point(18,45), new Point(18,46),
-                    new Point(16,48), new Point(15,48), new Point(14,49), new Point(14,64), new Point(15,65), new Point(16,65),
-                    new Point(17,66), new Point(18,66), new Point(20,68), new Point(22,68), new Point(22,69), new Point(22,63),
-                    new Point(23,62), new Point(23,28) };
+                new Point(20,36), new Point(20,40), new Point(19,41), new Point(19,44), new Point(18,45), new Point(18,46),
+                new Point(16,48), new Point(15,48), new Point(14,49), new Point(14,64), new Point(15,65), new Point(16,65),
+                new Point(17,66), new Point(18,66), new Point(20,68), new Point(22,68), new Point(22,69), new Point(22,63),
+                new Point(23,62), new Point(23,28) };
                 Point[] puntoAtr = { new Point(29, 21), new Point(31, 19), new Point(32, 19), new Point(33, 20), new Point(33, 25),
-                    new Point(33,26), new Point(32,63), new Point(34,65), new Point(34,68), new Point(33,69), new Point(33,74),
-                    new Point(32,73), new Point(31,73), new Point(29,71), new Point(27,73), new Point(26,73), new Point(25,74),
-                    new Point(25,69), new Point(24,68), new Point(24,65), new Point(26,63), new Point(26,26), new Point(25,25),
-                    new Point(25,20), new Point(26,19), new Point(27,19), new Point(29,21)};
+                new Point(33,26), new Point(32,63), new Point(34,65), new Point(34,68), new Point(33,69), new Point(33,74),
+                new Point(32,73), new Point(31,73), new Point(29,71), new Point(27,73), new Point(26,73), new Point(25,74),
+                new Point(25,69), new Point(24,68), new Point(24,65), new Point(26,63), new Point(26,26), new Point(25,25),
+                new Point(25,20), new Point(26,19), new Point(27,19), new Point(29,21)};
 
-                if (velox == 1)
-                {
-                    PintaImg.FillRectangle(Brushes.DarkOrange, 35, 6, 1, 1);
-                    PintaImg.FillRectangle(Brushes.Orange, 36, 4, 1, 1);
-                    PintaImg.FillRectangle(Brushes.Yellow, 37, 2, 1, 1);
 
-                }
-                else if (velox == 2)
+                // --- LÓGICA DE VELOCIDAD/EFECTOS (Corregida) ---
+
+                if (velox == 1) // Efectos de "Movimiento Lento / Reposo"
                 {
-                    PintaImg.FillRectangle(Brushes.DarkRed, 1, 1, 8, 8);
-                    PintaImg.FillRectangle(Brushes.DarkRed, 2, 2, 1, 16);
-                    PintaImg.FillRectangle(Brushes.DarkRed, 2, 3, 1, 9);
+                    // Ejemplo de dibujar un efecto de motor simple
+                    PintaImg.FillRectangle(Brushes.Orange, 30, 75, 2, 5); // Fuego trasero central
+
+                    // Dibujamos los polígonos de alas/cuerpo si son parte del efecto
+                    // Por ejemplo, para resaltar las alas.
+                    using (SolidBrush brush = new SolidBrush(Color.FromArgb(50, Color.White)))
+                    {
+                        PintaImg.FillPolygon(brush, puntoDer);
+                        PintaImg.FillPolygon(brush, puntoIzq);
+                    }
                 }
+                else if (velox == 2) // Efectos de "Aceleración / Escudo"
+                {
+                    // Dibujar los polígonos de efectos (como escudos) con un color diferente
+                    using (SolidBrush shieldBrush = new SolidBrush(Color.FromArgb(150, Color.LightBlue)))
+                    {
+                        PintaImg.FillPolygon(shieldBrush, puntoDer);
+                        PintaImg.FillPolygon(shieldBrush, puntoIzq);
+                        PintaImg.FillPolygon(shieldBrush, puntoAtr);
+                    }
+                    // Dibujar llamas más intensas
+                    PintaImg.FillRectangle(Brushes.Red, 30, 70, 2, 10);
+                }
+                // Los casos velox == 3 y los rectángulos originales no parecen estar relacionados
+                // con los polígonos definidos. Si necesitas esos efectos de píxeles, úsalos:
                 else if (velox == 3)
                 {
+                    // Mantengo tus píxeles de ejemplo, aunque están en posiciones bajas (1, 1) que no afectan la nave grande
                     PintaImg.FillRectangle(Brushes.DarkRed, 15, 30, 1, 1);
                     PintaImg.FillRectangle(Brushes.DarkRed, 25, 1, 1, 16);
                     PintaImg.FillRectangle(Brushes.DarkRed, 37, 1, 1, 9);
                 }
 
+                // 2. Asignar la imagen final y rotarla si es necesario
                 Avion.Image = Utils.RotateImage(ImagenConEfectos, AngRotar);
             }
         }

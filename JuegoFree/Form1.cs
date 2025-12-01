@@ -1,24 +1,37 @@
 ﻿using JuegoFree.Core;
 using JuegoFree.Entities;
+using JuegoFree.Properties;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using TimerForms = System.Windows.Forms.Timer;
 
 namespace JuegoFree
 {
-    // Clase dummy para Modulo.Escenario que se usa en Iniciar(
-
+    // Hacemos que la clase no sea parcial si todo el código está aquí.
     public partial class Form1 : Form
     {
+        // Campos que deben ser accesibles para la escena de juego (GameScene)
+        // para que pueda inicializarlos.
+        public PictureBox Navex
+        {
+            get => navex;
+            set => navex = value;
+        }
+        public PictureBox NaveRival
+        {
+            get => naveRival;
+            set => naveRival = value;
+        }
+        public PictureBox[] PlayerHearts => playerHearts;
+        public PictureBox[] RivalHearts => rivalHearts;
+        // Propiedad para saber si el juego está activo
+        public bool IsGameActive { get; set; } = false;
+
+        private PictureBox[] playerHearts = new PictureBox[5];
+        private PictureBox[] rivalHearts = new PictureBox[5];
+        private const int FULL_HEART_VALUE = 20;
+
         private PictureBox navex = new PictureBox();
         private PictureBox naveRival = new PictureBox();
         private PictureBox contiene = new PictureBox();
@@ -27,76 +40,100 @@ namespace JuegoFree
         private bool flag = false;
         private float angulo = 0;
 
-        public void ActividadTecla(object sender, KeyEventArgs e)
+        public void TeclaPresionada(object sender, KeyEventArgs e)
         {
-            // Usamos el gestor de entrada modularizado
-            InputManager.HandleKeyPress(e, navex, contiene, tiempo, ref angulo);
+            InputManager.SetKeyDown(e.KeyCode);
+            Console.WriteLine($"Tecla presionada: {e.KeyCode}");
+            e.Handled = true;
+            e.SuppressKeyPress = true;
         }
 
-        /************* ACTIVAR ACCIONES DE INICIALIZACION *************/
+        public void TeclaLiberada(object sender, KeyEventArgs e)
+        {
+            InputManager.SetKeyUp(e.KeyCode);
+        }
+
+        // Nuevo método para cambiar de escena
+        public void LoadGameScene()
+        {
+            // Marcamos que el juego está activo
+            IsGameActive = true;
+
+            // Enviamos el contenedor y la referencia al Formulario para que la escena pueda inicializar las naves/corazones
+            Scenes.GameScene.Escenario(contiene, this, 1);
+        }
+
         public void Iniciar()
         {
-            this.FormBorderStyle = FormBorderStyle.SizableToolWindow;
-            this.Width = 445;
-            this.Height = 550;
+            int screenW = Screen.PrimaryScreen.WorkingArea.Width;
+            int screenH = Screen.PrimaryScreen.WorkingArea.Height;
+            GameSettings.CurrentScreenWidth = screenW;
+            GameSettings.CurrentScreenHeight = screenH;
+
+            this.Width = 1000;
+            this.Height = 800;
             this.Text = "JUEGO DE AVIONES";
 
-            label1.Location = new Point(10, 10);
-            label2.Location = new Point(10, 30);
-            label1.Text = "Mi Rival: (50)"; // Inicializar vida
-            label2.Text = "Mi Nave: (20)"; // Inicializar vida
+            this.FormBorderStyle = FormBorderStyle.Sizable;
+            this.WindowState = FormWindowState.Normal;
+            this.StartPosition = FormStartPosition.CenterScreen;
 
-            this.KeyDown += new KeyEventHandler(ActividadTecla);
+            int currentW = this.ClientSize.Width;
+            int currentH = this.ClientSize.Height;
 
-            contiene.Location = new Point(0, 0);
-            contiene.BackColor = Color.Black; // Cambiado a negro para mejor contraste
-            contiene.Size = new Size(300, 420);
-            contiene.Dock = DockStyle.Fill;
-            Controls.Add(contiene);
+            const float ASPECT_RATIO_W_OVER_H = (float)GameSettings.DESIGN_GAME_WIDTH / GameSettings.DESIGN_GAME_HEIGHT;
+
+            int targetGameHeight = (int)(currentH * 0.95);
+            int targetGameWidth = (int)(targetGameHeight * ASPECT_RATIO_W_OVER_H);
+
+            if (targetGameWidth > currentW * 0.95)
+            {
+                targetGameWidth = (int)(currentW * 0.95);
+                targetGameHeight = (int)(targetGameWidth / ASPECT_RATIO_W_OVER_H);
+            }
+
+            contiene.Size = new Size(targetGameWidth, targetGameHeight);
+
+            int xPos = (currentW - targetGameWidth) / 2;
+            int yPos = (currentH - targetGameHeight) / 2;
+
+            contiene.Location = new Point(xPos, yPos);
+            contiene.BackColor = Color.Black;
             contiene.Visible = true;
+            Controls.Add(contiene);
 
-            Controls.Add(label1);
-            Controls.Add(label2);
+            this.KeyDown += new KeyEventHandler(TeclaPresionada);
+            this.KeyUp += new KeyEventHandler(TeclaLiberada);
 
-            // Contenido del formulario
-            Random r = new Random();
-            int aletY = r.Next(250, 330);
-            int aletX = r.Next(50, contiene.Width - 50);
+            // Cargar el Menú Principal al inicio
+            Scenes.MainMenuScene.Load(contiene, this);
 
-            ShipFactory.CreateShip(navex, 0, 1, Color.SeaGreen, 20);
-            contiene.Controls.Add(navex);
-
-            Random sal = new Random();
-            int sale = sal.Next(1, 2);
-            ShipFactory.CreateShip(naveRival, 180, sale, Color.DarkBlue, 50);
-            contiene.Controls.Add(naveRival); // Añadir nave rival al contenedor
-
-            Scenes.GameScene.Escenario(contiene, sale);
-
-            navex.Location = new Point(aletX, aletY);
-            naveRival.Location = new Point(aletX, 50);
+            this.KeyPreview = true;
 
             tiempo = new TimerForms();
-            tiempo.Interval = 1;
+            tiempo.Interval = 20;
             tiempo.Enabled = true;
 
-            // CONEXIÓN DEL TICK AL NUEVO GESTOR DE BUCLE
+            // CONEXIÓN DEL TICK AL GESTOR DE BUCLE (Ejecutar solo si el juego está activo)
             tiempo.Tick += (sender, e) =>
             {
-                GameLoopManager.HandleGameTick(
-                    naveRival,
-                    navex,
-                    contiene,
-                    ref Dispara,
-                    ref flag,
-                    label1,
-                    label2,
-                    tiempo);
+                if (IsGameActive)
+                {
+                    GameLoopManager.HandleGameTick(
+                        naveRival,
+                        navex,
+                        contiene,
+                        ref Dispara,
+                        ref flag,
+                        tiempo, // Aunque 'tiempo' no se usa aquí, si GameLoopManager lo necesita, se mantiene
+                        ref angulo,
+                        playerHearts,
+                        rivalHearts);
+                }
             };
             tiempo.Start();
         }
 
-        /************* ARGUMENTOS GENERADOS POR EL PROGRAMA *************/
         public Form1()
         {
             InitializeComponent();

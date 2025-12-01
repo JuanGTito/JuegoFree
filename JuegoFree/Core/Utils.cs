@@ -23,5 +23,6 @@ namespace JuegoFree.Core
             }
             return bmp;
         }
+
     }
 }
