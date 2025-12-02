@@ -375,8 +375,6 @@ namespace JuegoFree.Entities
         {
             int largoN = 1;
             int anchoN = 1;
-            const int IMG_ORIGINAL_WIDTH = 347;
-            const int IMG_ORIGINAL_HEIGHT = 470;
             Point[] selectedNavePoints = null;
 
             if (Tipox == 1)
@@ -424,26 +422,26 @@ namespace JuegoFree.Entities
                     PintaImg.Clear(Color.Transparent);
                     PintaImg.SmoothingMode = SmoothingMode.None;
 
-                    Brush primaryBrush;
-                    bool useTexture = (Tipox == 1 && Resources.Nave1Texture != null);
+                    using (SolidBrush baseBrush = new SolidBrush(Pintar))
+                    {
+                        PintaImg.FillPolygon(baseBrush, myNave);
+                    }
 
                     if (Tipox == 1)
                     {
-                        // 1. Capa: Cabina (Gris claro)
                         Point[] cabinaRotada = RotatePointsIfNecessary(myNave1_Cabina, AngRotar, largoN);
                         using (SolidBrush cabinaBrush = new SolidBrush(Color.Silver))
                         {
                             PintaImg.FillPolygon(cabinaBrush, cabinaRotada);
                         }
 
-                        // 2. Capa: Motores/Luz (Naranja/Amarillo)
                         Point[] motorLuzRotada = RotatePointsIfNecessary(myNave1_MotorLuz, AngRotar, largoN);
                         using (SolidBrush luzBrush = new SolidBrush(Color.Orange))
                         {
                             PintaImg.FillPolygon(luzBrush, motorLuzRotada);
                         }
 
-                        // Aquí podrías agregar más capas (alas, armas, sombras) usando sus respectivos polígonos.
+                        // Aquí agregar más capas (alas, armas, sombras)
                     }
                 }
                 Avion.Image = Imagen;
@@ -454,11 +452,9 @@ namespace JuegoFree.Entities
         //-------------EFECTOS DE LA NAVE PRINCIPAL-------------//
         public static void ShipRun(PictureBox Avion, int AngRotar, int velox)
         {
-            // 1. Obtener la imagen base (sin efectos)
             Bitmap ImagenBase = (Avion.Image as Bitmap);
             if (ImagenBase == null)
             {
-                // Si no hay imagen base (posiblemente CreateShip falló o no se llamó), salimos.
                 return;
             }
 
@@ -467,7 +463,7 @@ namespace JuegoFree.Entities
 
             using (Graphics PintaImg = Graphics.FromImage(ImagenConEfectos))
             {
-                // Dibujar la nave base (sin rotar)
+                // Dibujar la nave base
                 PintaImg.DrawImage(ImagenBase, new Point(0, 0));
 
                 // Puntos de Efectos de la Nave (Asumo que son de la Nave Tipo 1)
@@ -488,44 +484,34 @@ namespace JuegoFree.Entities
                 new Point(25,20), new Point(26,19), new Point(27,19), new Point(29,21)};
 
 
-                // --- LÓGICA DE VELOCIDAD/EFECTOS (Corregida) ---
 
-                if (velox == 1) // Efectos de "Movimiento Lento / Reposo"
+                if (velox == 1)
                 {
-                    // Ejemplo de dibujar un efecto de motor simple
-                    PintaImg.FillRectangle(Brushes.Orange, 30, 75, 2, 5); // Fuego trasero central
+                    PintaImg.FillRectangle(Brushes.Orange, 30, 75, 2, 5);
 
-                    // Dibujamos los polígonos de alas/cuerpo si son parte del efecto
-                    // Por ejemplo, para resaltar las alas.
                     using (SolidBrush brush = new SolidBrush(Color.FromArgb(50, Color.White)))
                     {
                         PintaImg.FillPolygon(brush, puntoDer);
                         PintaImg.FillPolygon(brush, puntoIzq);
                     }
                 }
-                else if (velox == 2) // Efectos de "Aceleración / Escudo"
+                else if (velox == 2)
                 {
-                    // Dibujar los polígonos de efectos (como escudos) con un color diferente
                     using (SolidBrush shieldBrush = new SolidBrush(Color.FromArgb(150, Color.LightBlue)))
                     {
                         PintaImg.FillPolygon(shieldBrush, puntoDer);
                         PintaImg.FillPolygon(shieldBrush, puntoIzq);
                         PintaImg.FillPolygon(shieldBrush, puntoAtr);
                     }
-                    // Dibujar llamas más intensas
                     PintaImg.FillRectangle(Brushes.Red, 30, 70, 2, 10);
                 }
-                // Los casos velox == 3 y los rectángulos originales no parecen estar relacionados
-                // con los polígonos definidos. Si necesitas esos efectos de píxeles, úsalos:
                 else if (velox == 3)
                 {
-                    // Mantengo tus píxeles de ejemplo, aunque están en posiciones bajas (1, 1) que no afectan la nave grande
                     PintaImg.FillRectangle(Brushes.DarkRed, 15, 30, 1, 1);
                     PintaImg.FillRectangle(Brushes.DarkRed, 25, 1, 1, 16);
                     PintaImg.FillRectangle(Brushes.DarkRed, 37, 1, 1, 9);
                 }
 
-                // 2. Asignar la imagen final y rotarla si es necesario
                 Avion.Image = Utils.RotateImage(ImagenConEfectos, AngRotar);
             }
         }
@@ -537,13 +523,12 @@ namespace JuegoFree.Entities
                 Point[] rotated = new Point[originalPoints.Length];
                 for (int i = 0; i < originalPoints.Length; i++)
                 {
-                    // Mantenemos X, invertimos Y
                     rotated[i].X = originalPoints[i].X;
                     rotated[i].Y = height - 1 - originalPoints[i].Y;
                 }
                 return rotated;
             }
-            return originalPoints; // No hay rotación
+            return originalPoints;
         }
     }
 }

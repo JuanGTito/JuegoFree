@@ -8,25 +8,17 @@ namespace JuegoFree.Core
 {
     public static class GameSettings
     {
-        // ========================================================
-        // 1. RESOLUCIÓN BASE DE DISEÑO (Design Resolution) 📐
-        // Define la proporción y tamaño para el que diseñaste tu juego vertical.
-        // Usa una proporción estándar (ej. 4:5 o 800:1000) para tu juego de naves.
-        // ========================================================
-        public const int DESIGN_GAME_WIDTH = 800;
-        public const int DESIGN_GAME_HEIGHT = 1000;
+        // 1. RESOLUCIÓN BASE DE DISEÑO
+        public const int GAME_WIDTH = 600;
+        public const int GAME_HEIGHT = 800;
 
-        // ========================================================
-        // 2. ESCALAMIENTO Y PANTALLA ACTUAL 🖥️
-        // Valores detectados en tiempo real por el Form1 al inicio.
-        // ========================================================
+        public const int STARS_SPEED_GAME = 5;
+
+        // 2. ESCALAMIENTO Y PANTALLA ACTUAL
         public static int CurrentScreenWidth { get; set; }
         public static int CurrentScreenHeight { get; set; }
 
-        // ========================================================
-        // 3. CONSTANTES DE JUGABILIDAD 🚀
-        // Fija los valores que definen la dificultad y el HUD.
-        // ========================================================
+        // 3. CONSTANTES DE JUGABILIDAD
 
         // Vida
         public const int PLAYER_MAX_HEALTH = 100; // Vida máxima para el jugador y rival
@@ -44,9 +36,7 @@ namespace JuegoFree.Core
         // El umbral que Dispara debe alcanzar (50 frames * 20ms/frame = 1 segundo)
         public const int RIVAL_FIRE_THRESHOLD = 50;
 
-        // ========================================================
-        // 4. CONSTANTES DE HUD Y VISUALES (Opcional) 🎨
-        // ========================================================
+        // 4. CONSTANTES DE HUD Y VISUALES
         public const int HUD_MARGIN = 10; // Margen para los elementos del HUD (corazones)
         public const int SHIP_WIDTH = 50; // Ancho base de la nave (usado en ShipFactory)
         public const int SHIP_HEIGHT = 50; // Alto base de la nave

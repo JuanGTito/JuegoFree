@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static JuegoFree.Core.Utils;
 using TimerForms = System.Windows.Forms.Timer;
+using JuegoFree.Scenes;
 
 namespace JuegoFree.Core
 {
@@ -33,7 +34,6 @@ namespace JuegoFree.Core
 
             InputManager.ProcessGameLogic(navex, contiene, tiempo, ref angulo);
 
-            // VARIABLES LOCALES (Copias por legibilidad)
             int X = naveRival.Location.X;
             int Y = naveRival.Location.Y;
             int W = naveRival.Width;
@@ -47,9 +47,14 @@ namespace JuegoFree.Core
             int y = naveRival.Location.Y;
             int verticalLimit = contiene.Height / 2;
 
+            const int GAME_W = 600;
+            const int GAME_H = 800;
+
+            int offsetX = (contiene.Width - GAME_W) / 2;
+            int offsetY = (contiene.Height - GAME_H) / 2;
+
             Dispara++;
 
-            // ACCION DE DISPARAR DEL RIVAL
             if (Dispara == 15 && naveRival.Visible == true)
             {
                 int xRival = naveRival.Location.X + (naveRival.Width / 2);
@@ -60,63 +65,53 @@ namespace JuegoFree.Core
                 Dispara = 0;
             }
 
-            // --- MOVIMIENTO DE LA NAVE RIVAL (X Fijo + Y Aleatorio) ---
+            int minX_Boundary = offsetX;
+            int maxX_Boundary = offsetX + GAME_W - naveRival.Width;
 
-            if (flag == false) // Moviéndose a la derecha
+            if (flag == false)
             {
-                // Verifica el límite derecho
-                if (contiene.Width <= x + naveRival.Width + HORIZONTAL_SPEED)
+                if (x + HORIZONTAL_SPEED >= maxX_Boundary)
                     flag = true;
+
                 x += HORIZONTAL_SPEED;
             }
-            else // Moviéndose a la izquierda
+            else
             {
-                // Verifica el límite izquierdo
-                if (0 >= x - HORIZONTAL_SPEED)
+                if (x - HORIZONTAL_SPEED <= minX_Boundary)
                     flag = false;
+
                 x -= HORIZONTAL_SPEED;
             }
+            x = Math.Max(minX_Boundary, Math.Min(x, maxX_Boundary));
 
 
-            // 2. MOVIMIENTO VERTICAL (Aleatorio y Gradual para la fluidez)
 
             verticalMoveTimer++;
 
-            if (verticalMoveTimer >= RANDOM_CHANGE_FREQUENCY) // Cambia la dirección sutil cada X ticks
+            if (verticalMoveTimer >= RANDOM_CHANGE_FREQUENCY)
             {
-                // Genera un desplazamiento vertical sutil: -1 (arriba), 0 (quieto), o 1 (abajo)
                 currentYDirection = random.Next(-1, 2);
                 verticalMoveTimer = 0;
             }
 
-            // Aplica el movimiento Y actual (solo un pixel por tick para fluidez)
             int newY = y + currentYDirection;
 
-            // --- LÍMITES VERTICALES ---
-
-            // Límite Superior (10px del borde)
-            if (newY < 10)
+            if (newY < offsetY + 10)
             {
-                newY = 10;
-                // Fuerza la dirección hacia abajo si choca con el límite superior.
+                newY = offsetY + 10;
                 currentYDirection = 1;
             }
-            // Límite Inferior (No cruzar la mitad de la pantalla)
-            else if (newY > verticalLimit - naveRival.Height)
+            else if (newY > offsetY + (GAME_H / 2) - naveRival.Height)
             {
-                newY = verticalLimit - naveRival.Height;
-                // Fuerza la dirección hacia arriba si choca con el límite.
+                newY = offsetY + (GAME_H / 2) - naveRival.Height;
                 currentYDirection = -1;
             }
 
-            y = newY; // Aplica la Y corregida.
-
-
-            // 3. APLICAR LA NUEVA POSICIÓN COMBINADA
+            y = newY;
             naveRival.Location = new Point(x, y);
 
             // ELIMINACION DEL MISIL Y DESCONTAR PUNTOS DE IMPACTO
-            foreach (Control c in contiene.Controls.OfType<PictureBox>().ToList()) // Usamos ToList() para modificar la colección
+            foreach (Control c in contiene.Controls.OfType<PictureBox>().ToList())
             {
                 int X1 = c.Location.X;
                 int Y1 = c.Location.Y;
@@ -126,7 +121,6 @@ namespace JuegoFree.Core
 
                 if (nombre == "Misil" || nombre == "Rival")
                 {
-                    // Movimiento de misiles
                     if (nombre == "Misil")
                     {
                         c.Top -= 10;
@@ -137,7 +131,6 @@ namespace JuegoFree.Core
                     }
                 }
 
-                // --- Detección de Colisiones ---
 
                 // ACTIVIDAD DE IMPACTO CON LA NAVE RIVAL (Misil del jugador golpea)
                 if (X < X1 && X1 + W1 < X + W && Y < Y1 && Y1 + H1 < Y + H && nombre == "Misil")

@@ -63,6 +63,16 @@ namespace JuegoFree.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap GameBackgroundBase {
+            get {
+                object obj = ResourceManager.GetObject("GameBackgroundBase", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Heart_Empty {
             get {
                 object obj = ResourceManager.GetObject("Heart_Empty", resourceCulture);
@@ -76,6 +86,26 @@ namespace JuegoFree.Properties {
         internal static System.Drawing.Bitmap Heart_Full {
             get {
                 object obj = ResourceManager.GetObject("Heart_Full", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap MenuBackgroundBase {
+            get {
+                object obj = ResourceManager.GetObject("MenuBackgroundBase", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap MenuShip {
+            get {
+                object obj = ResourceManager.GetObject("MenuShip", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

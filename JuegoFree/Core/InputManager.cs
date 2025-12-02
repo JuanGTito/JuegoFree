@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using JuegoFree.Core;
+using JuegoFree.Entities;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Security.Policy;
 using System.Windows.Forms;
-using JuegoFree.Entities;
 
 namespace JuegoFree.Core
 {
@@ -15,6 +17,12 @@ namespace JuegoFree.Core
 
         private const long FIRE_RATE_MS = 250;
         private static long _lastShotTime = 0;
+
+        private const int GAME_W = GameSettings.GAME_WIDTH;
+        private const int GAME_H = GameSettings.GAME_HEIGHT;
+
+        private static int offsetX = 0;
+        private static int offsetY = 0;
 
         static InputManager()
         {
@@ -39,54 +47,66 @@ namespace JuegoFree.Core
             ref float angulo)
         {
             angulo = 0;
-            // Movimiento Nave izquierda
-            if (CurrentKeys.Contains(Keys.Left) || _keyDown.Contains((Keys)37))
+
+            offsetX = (contiene.Width - GAME_W) / 2;
+            offsetY = (contiene.Height - GAME_H) / 2;
+
+            int minX = offsetX;
+            int maxX = offsetX + GAME_W - navex.Width;
+            int minY = offsetY;
+
+            int maxY = offsetY + GAME_H - navex.Height - 50;
+
+            int speed = 10;
+            int currentLeft = navex.Left;
+            int currentTop = navex.Top;
+
+
+            if (CurrentKeys.Contains(Keys.Left))
             {
-                if ((navex.Left - 10 >= 0))
-                {
-                    navex.Left -= 10;
-                    angulo = -15;
-                    ShipFactory.ShipRun(navex, (int)angulo, 0);
-                }
-                else if (navex.Left > 0)
-                {
-                    navex.Left = 0;
-                }
+                currentLeft -= speed;
+                angulo = -15;
             }
-            // Movimiento Nave derecha
-            if (_keyDown.Contains(Keys.Right) || _keyDown.Contains((Keys)39))
+            if (CurrentKeys.Contains(Keys.Right))
             {
-                if ((navex.Left + navex.Width + 10 <= contiene.Width))
-                {
-                    navex.Left += 10;
-                    angulo = 15;
-                    ShipFactory.ShipRun(navex, (int)angulo, 0);
-                }
-                else
-                {
-                    navex.Left = contiene.Width - navex.Width;
-                }
-            }
-            // Movimiento Nave arriba
-            if (CurrentKeys.Contains(Keys.Up) || _keyDown.Contains((Keys)38))
-            {
-                if ((contiene.Top < navex.Top))
-                {
-                    navex.Top -= 10;
-                    ShipFactory.ShipRun(navex, 0, 1);
-                }
-            }
-            // Movimiento Nave abajo
-            if (_keyDown.Contains(Keys.Down) || _keyDown.Contains((Keys)40))
-            {
-                if ((contiene.Bottom > navex.Bottom + 50))
-                {
-                    navex.Top += 10;
-                    ShipFactory.ShipRun(navex, 0, 1);
-                }
+                currentLeft += speed;
+                angulo = 15;
             }
 
-            if (_keyDown.Contains(Keys.Enter) || _keyDown.Contains((Keys)13))
+
+            if (CurrentKeys.Contains(Keys.Up))
+            {
+                currentTop -= speed;
+            }
+            if (CurrentKeys.Contains(Keys.Down))
+            {
+                currentTop += speed;
+            }
+
+
+            // Restringir X al área de 600px central
+            navex.Left = Math.Max(minX, Math.Min(currentLeft, maxX));
+
+            // Restringir Y al área de 800px central
+            navex.Top = Math.Max(minY, Math.Min(currentTop, maxY));
+
+            // Si hubo movimiento horizontal, se ejecuta ShipRun para el ángulo/rotación
+            if (CurrentKeys.Contains(Keys.Left) || CurrentKeys.Contains(Keys.Right))
+            {
+                ShipFactory.ShipRun(navex, (int)angulo, 0);
+            }
+            // Si hubo movimiento vertical, se ejecuta ShipRun para el efecto de velocidad
+            else if (CurrentKeys.Contains(Keys.Up) || CurrentKeys.Contains(Keys.Down))
+            {
+                ShipFactory.ShipRun(navex, 0, 1);
+            }
+            else
+            {
+                // Si no hay movimiento, restauramos el ángulo a 0 (nave recta)
+                ShipFactory.ShipRun(navex, 0, 0);
+            }
+
+            if (_keyDown.Contains(Keys.Enter))
             {
                 Fire(navex, contiene, tiempo);
             }

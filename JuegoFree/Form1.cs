@@ -11,8 +11,6 @@ namespace JuegoFree
     // Hacemos que la clase no sea parcial si todo el código está aquí.
     public partial class Form1 : Form
     {
-        // Campos que deben ser accesibles para la escena de juego (GameScene)
-        // para que pueda inicializarlos.
         public PictureBox Navex
         {
             get => navex;
@@ -25,7 +23,6 @@ namespace JuegoFree
         }
         public PictureBox[] PlayerHearts => playerHearts;
         public PictureBox[] RivalHearts => rivalHearts;
-        // Propiedad para saber si el juego está activo
         public bool IsGameActive { get; set; } = false;
 
         private PictureBox[] playerHearts = new PictureBox[5];
@@ -43,7 +40,7 @@ namespace JuegoFree
         public void TeclaPresionada(object sender, KeyEventArgs e)
         {
             InputManager.SetKeyDown(e.KeyCode);
-            Console.WriteLine($"Tecla presionada: {e.KeyCode}");
+            //Console.WriteLine($"Tecla presionada: {e.KeyCode}");
             e.Handled = true;
             e.SuppressKeyPress = true;
         }
@@ -68,8 +65,8 @@ namespace JuegoFree
             GameSettings.CurrentScreenWidth = screenW;
             GameSettings.CurrentScreenHeight = screenH;
 
-            this.Width = 1000;
-            this.Height = 800;
+            this.Width = 1200;
+            this.Height = 900;
             this.Text = "JUEGO DE AVIONES";
 
             this.FormBorderStyle = FormBorderStyle.Sizable;
@@ -79,23 +76,10 @@ namespace JuegoFree
             int currentW = this.ClientSize.Width;
             int currentH = this.ClientSize.Height;
 
-            const float ASPECT_RATIO_W_OVER_H = (float)GameSettings.DESIGN_GAME_WIDTH / GameSettings.DESIGN_GAME_HEIGHT;
+            contiene.Size = new Size(currentW, currentH);
 
-            int targetGameHeight = (int)(currentH * 0.95);
-            int targetGameWidth = (int)(targetGameHeight * ASPECT_RATIO_W_OVER_H);
+            contiene.Location = new Point(0, 0);
 
-            if (targetGameWidth > currentW * 0.95)
-            {
-                targetGameWidth = (int)(currentW * 0.95);
-                targetGameHeight = (int)(targetGameWidth / ASPECT_RATIO_W_OVER_H);
-            }
-
-            contiene.Size = new Size(targetGameWidth, targetGameHeight);
-
-            int xPos = (currentW - targetGameWidth) / 2;
-            int yPos = (currentH - targetGameHeight) / 2;
-
-            contiene.Location = new Point(xPos, yPos);
             contiene.BackColor = Color.Black;
             contiene.Visible = true;
             Controls.Add(contiene);
@@ -112,11 +96,12 @@ namespace JuegoFree
             tiempo.Interval = 20;
             tiempo.Enabled = true;
 
-            // CONEXIÓN DEL TICK AL GESTOR DE BUCLE (Ejecutar solo si el juego está activo)
+
             tiempo.Tick += (sender, e) =>
             {
                 if (IsGameActive)
                 {
+                    
                     GameLoopManager.HandleGameTick(
                         naveRival,
                         navex,

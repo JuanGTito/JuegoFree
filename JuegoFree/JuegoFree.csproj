@@ -99,10 +99,16 @@
     <None Include="Resources\Heart_Empty.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Nave1TexturePng.png" />
+    <None Include="Resources\Nave1Texture.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Nave1Texture.png" />
+    <None Include="Resources\MenuBackgroundBase.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MenuShip.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\GameBackgroundBase.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
