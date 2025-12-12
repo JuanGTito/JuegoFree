@@ -20,6 +20,9 @@ namespace JuegoFree.Core
         private const int RANDOM_CHANGE_FREQUENCY = 30; // Cambiar la dirección Y cada 30 ticks
         private static int verticalMoveTimer = 0;
         private static int currentYDirection = 0;
+        private const string ASTEROIDE_NAME_PREFIX = "ASTEROIDE_";
+        private const int ASTEROID_SPAWN_RATE = 100;
+        private static int asteroidSpawnTimer = 0;
         public static void HandleGameTick(
             PictureBox naveRival,
             PictureBox navex,
@@ -52,6 +55,8 @@ namespace JuegoFree.Core
 
             int offsetX = (contiene.Width - GAME_W) / 2;
             int offsetY = (contiene.Height - GAME_H) / 2;
+
+            SpawnAsteroids(contiene, offsetX, GAME_W);
 
             Dispara++;
 
@@ -117,18 +122,31 @@ namespace JuegoFree.Core
                 int Y1 = c.Location.Y;
                 int W1 = c.Width;
                 int H1 = c.Height;
-                string nombre = c.Tag?.ToString();
+                string nombre = c.Name;
 
-                if (nombre == "Misil" || nombre == "Rival")
+                if (string.IsNullOrEmpty(nombre) && c.Tag != null)
                 {
-                    if (nombre == "Misil")
-                    {
-                        c.Top -= 10;
-                    }
-                    if (nombre == "Rival")
-                    {
-                        c.Top += 10;
-                    }
+                    nombre = c.Tag.ToString(); // Si Tag es la vida, esto es problemático
+                }
+
+                // --- 1. LÓGICA DE MOVIMIENTO (CORREGIDA) ---
+                if (nombre == "Misil")
+                {
+                    c.Top -= 10;
+                }
+                else if (nombre == "Rival")
+                {
+                    c.Top += 10;
+                }
+                // Si el Name del PictureBox se configura como "ASTEROIDE_1", "ASTEROIDE_2", etc.
+                else if (nombre != null && nombre.StartsWith(ASTEROIDE_NAME_PREFIX))
+                {
+                    int nuevaX = c.Location.X + 1;
+                    int nuevaY = c.Location.Y + 3;
+                    int asteroide_minX = offsetX;
+                    int asteroide_maxX = offsetX + GAME_W - c.Width;
+                    nuevaX = Math.Max(asteroide_minX, Math.Min(nuevaX, asteroide_maxX));
+                    c.Location = new Point(c.Location.X + 1, c.Location.Y + 3);
                 }
 
 
@@ -142,6 +160,66 @@ namespace JuegoFree.Core
                     vidaActualRival -= daño;
                     naveRival.Tag = vidaActualRival;
                     HeartManager.UpdateHearts(rivalHearts, vidaActualRival);
+                }
+
+                if (nombre != null && nombre.StartsWith("Asteroide"))
+                {
+                    // Chequeamos colisiones entre MISIL (Misil del Jugador) y este asteroide (c)
+                    var misiles = contiene.Controls.OfType<PictureBox>()
+                                          .Where(m => m.Tag?.ToString() == "Misil")
+                                          .ToList();
+
+                    foreach (var misil in misiles)
+                    {
+                        // Coordenadas del Misil
+                        int M_X = misil.Location.X;
+                        int M_Y = misil.Location.Y;
+                        int M_W = misil.Width;
+                        int M_H = misil.Height;
+
+                        // Colisión Misil (M) vs Asteroide (c)
+                        if (c.Bounds.IntersectsWith(misil.Bounds)) // Usamos Bounds para una colisión Bounding Box rápida
+                        {
+                            misil.Dispose(); // Destruir el misil
+
+                            // Lógica de daño al asteroide
+                            int vidaActualAsteroide = (int)c.Tag;
+                            vidaActualAsteroide -= 25; // Daño fijo (ajustar según la potencia de tu misil)
+                            c.Tag = vidaActualAsteroide;
+
+                            // Verificar destrucción del asteroide
+                            if (vidaActualAsteroide <= 0)
+                            {
+                                c.Dispose();
+                                // Opcional: Crear una explosión o generar asteroides más pequeños aquí
+                            }
+                            break; // Salir del bucle de misiles después de un impacto
+                        }
+                    }
+                }
+
+                if (nombre != null && nombre.StartsWith("Asteroide"))
+                {
+                    // Asteroide (c) vs Nave Jugador (navex)
+                    if (c.Bounds.IntersectsWith(navex.Bounds))
+                    {
+                        c.Dispose(); // Destruir asteroide
+
+                        // Lógica de daño al jugador
+                        int danoColision = 20; // Daño fijo por colisión con asteroide
+                        int vidaActualJugador = (int)navex.Tag;
+                        vidaActualJugador -= danoColision;
+                        navex.Tag = vidaActualJugador;
+                        HeartManager.UpdateHearts(playerHearts, vidaActualJugador);
+
+                        // Finalización del juego (Derrota del jugador por colisión)
+                        if (vidaActualJugador <= 0)
+                        {
+                            navex.Dispose();
+                            // ... (Lógica de Game Over) ...
+                            // La lógica de Game Over ya está más abajo, solo asegúrate de que se dispare
+                        }
+                    }
                 }
 
                 // Finalización del juego (Victoria del jugador)
@@ -190,8 +268,60 @@ namespace JuegoFree.Core
                     break;
                 }
 
-                // Destrucción de misiles fuera de límites
-                if ((c.Location.Y <= 0 && nombre == "Misil") || (c.Location.Y >= contiene.Height && nombre == "Rival"))
+                if (nombre != null && nombre.StartsWith(ASTEROIDE_NAME_PREFIX))
+                {
+                    // Chequeamos colisiones entre MISIL (Misil del Jugador) y este asteroide (c)
+                    // Buscamos misiles que estén cerca. Usamos c.Parent para evitar recorrer todo el contenedor si no es necesario.
+                    var misiles = contiene.Controls.OfType<PictureBox>()
+                                          .Where(m => m.Tag?.ToString() == "Misil" && c.Bounds.IntersectsWith(m.Bounds))
+                                          .ToList();
+
+                    foreach (var misil in misiles)
+                    {
+                        misil.Dispose(); // Destruir el misil
+
+                        // Lógica de daño al asteroide: ¡Asumimos que la vida está en c.Tag!
+                        if (c.Tag is int vidaActualAsteroide)
+                        {
+                            vidaActualAsteroide -= 25;
+                            c.Tag = vidaActualAsteroide;
+
+                            if (vidaActualAsteroide <= 0)
+                            {
+                                c.Dispose();
+                            }
+                        }
+                        break;
+                    }
+                }
+
+                // --- 3. COLISIÓN ASTEROIDE vs JUGADOR ---
+                if (nombre != null && nombre.StartsWith(ASTEROIDE_NAME_PREFIX))
+                {
+                    // Asteroide (c) vs Nave Jugador (navex)
+                    if (c.Bounds.IntersectsWith(navex.Bounds))
+                    {
+                        c.Dispose(); // Destruir asteroide
+
+                        // Lógica de daño al jugador
+                        int danoColision = 20;
+                        if (navex.Tag is int vidaActualJugador)
+                        {
+                            vidaActualJugador -= danoColision;
+                            navex.Tag = vidaActualJugador;
+                            HeartManager.UpdateHearts(playerHearts, vidaActualJugador);
+
+                            if (vidaActualJugador <= 0)
+                            {
+                                navex.Dispose();
+                                // Si se rompe el bucle aquí, el Game Over se ejecuta abajo
+                            }
+                        }
+                    }
+                }
+
+                if ((c.Location.Y <= 0 && nombre == "Misil") ||
+                (c.Location.Y >= contiene.Height && (nombre == "Rival" || nombre.StartsWith(ASTEROIDE_NAME_PREFIX))))
                 {
                     c.Dispose();
                 }
@@ -214,6 +344,47 @@ namespace JuegoFree.Core
                     tiempo.Stop(); // Detener el juego en colisión fatal ---- llevara al game over
                     break;
                 }
+            }
+        }
+        // Dentro de la clase GameLoopManager
+        private static void SpawnAsteroids(PictureBox contiene, int offsetX, int GAME_W)
+        {
+            const int GAME_H = 800;
+            asteroidSpawnTimer++;
+
+            if (asteroidSpawnTimer >= ASTEROID_SPAWN_RATE)
+            {
+                asteroidSpawnTimer = 0;
+
+                int tipoAsteroide = random.Next(1, 4);
+                int escala = random.Next(1, 3);
+
+                PictureBox nuevoAsteroide = new PictureBox
+                {
+                    BackColor = Color.Transparent,
+                    Name = $"{ASTEROIDE_NAME_PREFIX}{tipoAsteroide}"
+                };
+
+                Color colorAsteroide;
+                switch (random.Next(1, 4))
+                {
+                    case 1: colorAsteroide = Color.FromArgb(100, 100, 100); break;
+                    case 2: colorAsteroide = Color.FromArgb(120, 120, 120); break;
+                    default: colorAsteroide = Color.FromArgb(150, 100, 50); break;
+                }
+
+                AsteroidFactory.CreateAsteroid(nuevoAsteroide, tipoAsteroide, colorAsteroide, escala);
+
+                int maxSpawnX = offsetX + GAME_W - nuevoAsteroide.Width;
+                int spawnX = random.Next(offsetX, maxSpawnX);
+
+                int offsetY = (contiene.Height - GAME_H) / 2;
+                int spawnY = offsetY - nuevoAsteroide.Height;
+
+                nuevoAsteroide.Location = new Point(spawnX, spawnY);
+
+                contiene.Controls.Add(nuevoAsteroide);
+                nuevoAsteroide.BringToFront();
             }
         }
     }
