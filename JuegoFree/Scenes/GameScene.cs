@@ -51,7 +51,7 @@ namespace JuegoFree.Scenes
             int sale = r.Next(1, 2);
 
             PictureBox newNavex = new PictureBox();
-            ShipFactory.CreateShip(newNavex, 0, 1, Color.SeaGreen, 100, 4);
+            ShipFactory.CreateShip(newNavex, 0, 1, Color.SeaGreen, 100, 1);
             mainForm.Navex = newNavex;
             contiene.Controls.Add(mainForm.Navex);
             mainForm.Navex.BringToFront();

@@ -197,11 +197,21 @@ namespace JuegoFree.Core
                 }
 
                 // Lógica de colisión directa entre naves
-                if (W >= X2 && H >= Y2 && W2 >= X && H2 >= Y)
+                const int PADDING = 8;
+                bool navesColisionan =
+                    // 1. El borde izquierdo del Rival (X) está a la izquierda del borde derecho del Jugador (X2 + W2) MENOS el PADDING
+                    X + PADDING < X2 + W2 - PADDING &&
+                    // 2. El borde derecho del Rival (X + W) MENOS el PADDING está a la derecha del borde izquierdo del Jugador (X2) MAS el PADDING
+                    X + W - PADDING > X2 + PADDING &&
+                    // 3. El borde superior del Rival (Y) MAS el PADDING está arriba del borde inferior del Jugador (Y2 + H2) MENOS el PADDING
+                    Y + PADDING < Y2 + H2 - PADDING &&
+                    // 4. El borde inferior del Rival (Y + H) MENOS el PADDING está abajo del borde superior del Jugador (Y2) MAS el PADDING
+                    Y + H - PADDING > Y2 + PADDING;
+                if (navesColisionan)
                 {
                     naveRival.Dispose();
                     navex.Dispose();
-                    tiempo.Stop(); // Detener el juego en colisión fatal
+                    tiempo.Stop(); // Detener el juego en colisión fatal ---- llevara al game over
                     break;
                 }
             }
