@@ -1,17 +1,15 @@
-﻿using JuegoFree.Core;
-using JuegoFree.Entities;
+﻿using JuegoFree.Entities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Security.Policy;
 using System.Windows.Forms;
 
 namespace JuegoFree.Core
 {
     public static class InputManager
     {
-        private static readonly HashSet<Keys> _keyDown = new HashSet<Keys>();
+        private static readonly HashSet<Keys> _currentKeys = new HashSet<Keys>();
 
         private static readonly Stopwatch _stopwatch = new Stopwatch();
 
@@ -21,118 +19,139 @@ namespace JuegoFree.Core
         private const int GAME_W = GameSettings.GAME_WIDTH;
         private const int GAME_H = GameSettings.GAME_HEIGHT;
 
-        private static int offsetX = 0;
-        private static int offsetY = 0;
+        private const int MOVEMENT_SPEED = 10;
+        private const int BOTTOM_MARGIN = 50;
+
+        private static int _offsetX = 0;
+        private static int _offsetY = 0;
 
         static InputManager()
         {
             _stopwatch.Start();
         }
 
-        public static ISet<Keys> CurrentKeys => _keyDown;
+        public static ISet<Keys> CurrentKeys => _currentKeys;
 
         public static void SetKeyDown(Keys key)
         {
-            _keyDown.Add(key);
+            _currentKeys.Add(key);
         }
 
         public static void SetKeyUp(Keys key)
         {
-            _keyDown.Remove(key);
+            _currentKeys.Remove(key);
         }
+
         public static void ProcessGameLogic(
-            PictureBox navex,
-            PictureBox contiene,
-            Timer tiempo,
-            ref float angulo)
+            PictureBox shipPictureBox,
+            PictureBox container,
+            Timer gameTimer,
+            ref float angle)
         {
-            angulo = 0;
+            angle = 0;
 
-            offsetX = (contiene.Width - GAME_W) / 2;
-            offsetY = (contiene.Height - GAME_H) / 2;
+            CalculateGameBounds(container, shipPictureBox);
 
-            int minX = offsetX;
-            int maxX = offsetX + GAME_W - navex.Width;
-            int minY = offsetY;
+            int newLeft = shipPictureBox.Left;
+            int newTop = shipPictureBox.Top;
 
-            int maxY = offsetY + GAME_H - navex.Height - 50;
+            ProcessMovement(ref newLeft, ref newTop, ref angle);
 
-            int speed = 10;
-            int currentLeft = navex.Left;
-            int currentTop = navex.Top;
+            ApplyMovement(shipPictureBox, newLeft, newTop);
 
+            ApplyShipEffect(shipPictureBox, (int)angle);
 
-            if (CurrentKeys.Contains(Keys.Left))
+            if (_currentKeys.Contains(Keys.Enter))
             {
-                currentLeft -= speed;
-                angulo = -15;
+                Fire(shipPictureBox, container, gameTimer);
             }
-            if (CurrentKeys.Contains(Keys.Right))
+        }
+
+        private static void CalculateGameBounds(PictureBox container, PictureBox shipPictureBox)
+        {
+            _offsetX = (container.Width - GAME_W) / 2;
+            _offsetY = (container.Height - GAME_H) / 2;
+        }
+
+        private static void ProcessMovement(ref int currentLeft, ref int currentTop, ref float angle)
+        {
+            if (_currentKeys.Contains(Keys.Left))
             {
-                currentLeft += speed;
-                angulo = 15;
+                currentLeft -= MOVEMENT_SPEED;
+                angle = -15;
+            }
+            if (_currentKeys.Contains(Keys.Right))
+            {
+                currentLeft += MOVEMENT_SPEED;
+                angle = 15;
             }
 
-
-            if (CurrentKeys.Contains(Keys.Up))
+            if (_currentKeys.Contains(Keys.Up))
             {
-                currentTop -= speed;
+                currentTop -= MOVEMENT_SPEED;
             }
-            if (CurrentKeys.Contains(Keys.Down))
+            if (_currentKeys.Contains(Keys.Down))
             {
-                currentTop += speed;
+                currentTop += MOVEMENT_SPEED;
             }
+        }
 
+        private static void ApplyMovement(PictureBox shipPictureBox, int newLeft, int newTop)
+        {
+            int minX = _offsetX;
+            int maxX = _offsetX + GAME_W - shipPictureBox.Width;
+            int minY = _offsetY;
+            int maxY = _offsetY + GAME_H - shipPictureBox.Height - BOTTOM_MARGIN;
 
-            // Restringir X al área de 600px central
-            navex.Left = Math.Max(minX, Math.Min(currentLeft, maxX));
+            shipPictureBox.Left = Math.Max(minX, Math.Min(newLeft, maxX));
+            shipPictureBox.Top = Math.Max(minY, Math.Min(newTop, maxY));
+        }
 
-            // Restringir Y al área de 800px central
-            navex.Top = Math.Max(minY, Math.Min(currentTop, maxY));
+        private static void ApplyShipEffect(PictureBox shipPictureBox, int angle)
+        {
+            bool isMovingHorizontal = _currentKeys.Contains(Keys.Left) || _currentKeys.Contains(Keys.Right);
+            bool isMovingVertical = _currentKeys.Contains(Keys.Up) || _currentKeys.Contains(Keys.Down);
 
-            // Si hubo movimiento horizontal, se ejecuta ShipRun para el ángulo/rotación
-            if (CurrentKeys.Contains(Keys.Left) || CurrentKeys.Contains(Keys.Right))
+            if (isMovingHorizontal)
             {
-                ShipFactory.ShipRun(navex, (int)angulo, 0);
+                ShipFactory.ShipRun(shipPictureBox, angle, 0);
             }
-            // Si hubo movimiento vertical, se ejecuta ShipRun para el efecto de velocidad
-            else if (CurrentKeys.Contains(Keys.Up) || CurrentKeys.Contains(Keys.Down))
+            else if (isMovingVertical)
             {
-                ShipFactory.ShipRun(navex, 0, 1);
+                ShipFactory.ShipRun(shipPictureBox, 0, 1);
             }
             else
             {
-                // Si no hay movimiento, restauramos el ángulo a 0 (nave recta)
-                ShipFactory.ShipRun(navex, 0, 0);
-            }
-
-            if (_keyDown.Contains(Keys.Enter))
-            {
-                Fire(navex, contiene, tiempo);
+                ShipFactory.ShipRun(shipPictureBox, 0, 0);
             }
         }
 
-        private static void Fire(PictureBox navex, PictureBox contiene, Timer tiempo)
+        private static void Fire(PictureBox shipPictureBox, PictureBox container, Timer gameTimer)
         {
             long currentTime = _stopwatch.ElapsedMilliseconds;
             long timeSinceLastShot = currentTime - _lastShotTime;
 
             if (timeSinceLastShot >= FIRE_RATE_MS)
             {
-                tiempo.Start();
-                int x = navex.Location.X + (navex.Width / 2);
-                int y = navex.Location.Y;
+                if (!gameTimer.Enabled)
+                {
+                    gameTimer.Start();
+                }
+
+                int x = shipPictureBox.Left + (shipPictureBox.Width / 2);
+                int y = shipPictureBox.Top;
+
                 MissileFactory.CreateMisil(
-                    contiene,
+                    container,
                     0,
                     Color.DarkMagenta,
                     "Misil",
                     x,
                     y
-                    );
+                );
+
                 _lastShotTime = currentTime;
             }
-            
         }
     }
 }

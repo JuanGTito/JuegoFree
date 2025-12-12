@@ -51,13 +51,13 @@ namespace JuegoFree.Scenes
             int sale = r.Next(1, 2);
 
             PictureBox newNavex = new PictureBox();
-            ShipFactory.CreateShip(newNavex, 0, 1, Color.SeaGreen, 100);
+            ShipFactory.CreateShip(newNavex, 0, 1, Color.SeaGreen, 100, 4);
             mainForm.Navex = newNavex;
             contiene.Controls.Add(mainForm.Navex);
             mainForm.Navex.BringToFront();
 
             PictureBox newNaveRival = new PictureBox();
-            ShipFactory.CreateShip(newNaveRival, 180, sale, Color.DarkBlue, 100);
+            ShipFactory.CreateShip(newNaveRival, 180, sale, Color.DarkBlue, 100, 2);
             mainForm.NaveRival = newNaveRival;
             contiene.Controls.Add(mainForm.NaveRival);
             mainForm.NaveRival.BringToFront();

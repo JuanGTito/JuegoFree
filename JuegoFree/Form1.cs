@@ -87,8 +87,10 @@ namespace JuegoFree
             this.KeyDown += new KeyEventHandler(TeclaPresionada);
             this.KeyUp += new KeyEventHandler(TeclaLiberada);
 
+            LoadGameScene();
+
             // Cargar el Menú Principal al inicio
-            Scenes.MainMenuScene.Load(contiene, this);
+            //Scenes.MainMenuScene.Load(contiene, this);
 
             this.KeyPreview = true;
 
