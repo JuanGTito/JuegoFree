@@ -10,38 +10,57 @@ namespace JuegoFree.Core
 {
     internal class Utils
     {
-        public static Image RotateImage(Image img, float rotationAngle)
+        public static Image RotateImage(Image img, float angle)
         {
             Bitmap bmp = new Bitmap(img.Width, img.Height);
-            using (Graphics gfx = Graphics.FromImage(bmp))
-            {
-                gfx.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                gfx.TranslateTransform((float)bmp.Width / 2, (float)bmp.Height / 2);
-                gfx.TranslateTransform(-(float)bmp.Width / 2, -(float)bmp.Height / 2);
 
-                gfx.DrawImage(img, new Point(0, 0));
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+
+                g.TranslateTransform(img.Width / 2f, img.Height / 2f);
+                g.RotateTransform(angle);
+                g.TranslateTransform(-img.Width / 2f, -img.Height / 2f);
+
+                g.DrawImage(img, Point.Empty);
             }
+
             return bmp;
         }
+
 
         public static class PolygonParser
         {
             public static Point[] Parse(string data)
             {
-                string[] pairs = data.Split(';');
-                Point[] points = new Point[pairs.Length];
+                if (string.IsNullOrWhiteSpace(data))
+                    return new Point[0];
 
-                for (int i = 0; i < pairs.Length; i++)
+                string[] pairs = data.Split(';');
+                List<Point> points = new List<Point>();
+
+                foreach (string pair in pairs)
                 {
-                    string[] xy = pairs[i].Split(',');
-                    int x = int.Parse(xy[0]);
-                    int y = int.Parse(xy[1]);
-                    points[i] = new Point(x, y);
+                    if (string.IsNullOrWhiteSpace(pair))
+                        continue;
+
+                    string[] xy = pair.Split(',');
+
+                    if (xy.Length != 2)
+                        continue;
+
+                    if (int.TryParse(xy[0], out int x) &&
+                        int.TryParse(xy[1], out int y))
+                    {
+                        points.Add(new Point(x, y));
+                    }
                 }
 
-                return points;
+                return points.ToArray();
             }
         }
+
 
     }
 }

@@ -1,16 +1,22 @@
-﻿using System;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Windows.Forms;
+﻿using JuegoFree.Core;
+using JuegoFree.Data;
 using JuegoFree.Entities;
 using JuegoFree.Properties;
-using JuegoFree.Core;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace JuegoFree.Scenes
 {
     public static class GameScene
     {
-        public static void Escenario(PictureBox contiene, Form1 mainForm, ShipConfiguration playerShip)
+        public static void Escenario(
+            PictureBox contiene,
+            Form1 mainForm,
+            ShipConfiguration playerShip)
         {
             contiene.Controls.Clear();
             mainForm.IsGameActive = true;
@@ -21,85 +27,109 @@ namespace JuegoFree.Scenes
             int offsetX = (contiene.Width - AREA_W) / 2;
             int offsetY = (contiene.Height - AREA_H) / 2;
 
+            // ---------- FONDO ----------
             Bitmap background = new Bitmap(contiene.Width, contiene.Height);
-            Graphics g = Graphics.FromImage(background);
-
-            g.Clear(Color.Black);
-            g.SetClip(new Rectangle(offsetX, offsetY, AREA_W, AREA_H));
-
-            Image baseBackground = Resources.GameBackgroundBase;
-
-            if (baseBackground != null)
+            using (Graphics g = Graphics.FromImage(background))
             {
-                g.DrawImage(baseBackground, new Rectangle(offsetX, offsetY, AREA_W, AREA_H), new Rectangle(0, 0, baseBackground.Width, baseBackground.Height), GraphicsUnit.Pixel);
-            }
-            else
-            {
-                g.FillRectangle(new SolidBrush(Color.DarkBlue), offsetX, offsetY, AREA_W, AREA_H);
-            }
+                g.Clear(Color.Black);
+                g.SetClip(new Rectangle(offsetX, offsetY, AREA_W, AREA_H));
 
-            if (playerShip.ShipTypeID == 1)
-            {
-                g.FillRectangle(new SolidBrush(Color.DarkGray), offsetX, offsetY + AREA_H - 50, AREA_W, 5);
+                Image baseBackground = Resources.GameBackgroundBase;
+                if (baseBackground != null)
+                {
+                    g.DrawImage(
+                        baseBackground,
+                        new Rectangle(offsetX, offsetY, AREA_W, AREA_H),
+                        new Rectangle(0, 0, baseBackground.Width, baseBackground.Height),
+                        GraphicsUnit.Pixel);
+                }
+                else
+                {
+                    g.FillRectangle(Brushes.DarkBlue, offsetX, offsetY, AREA_W, AREA_H);
+                }
             }
 
             contiene.Image = background;
-            g.Dispose();
 
+            List<ShipEntity> shipEntities = ShipRepository.GetAllShips();
+            List<ShipConfiguration> allShips =
+                shipEntities
+                .Select(entity => ShipMapper.FromEntity(
+                    entity))
+            .ToList();
+
+
+            // ---------- NAVE JUGADOR ----------
+            PictureBox playerPB = new PictureBox();
+            ShipFactory.CreateShip(playerPB, playerShip, angulo: 0, escala: 1);
+
+            mainForm.Navex = playerPB;
+            contiene.Controls.Add(playerPB);
+            playerPB.BringToFront();
+
+            // ---------- NAVE RIVAL (TEMPORAL) ----------
+            ShipConfiguration enemyShip =
+                ShipSelector.GetRandomEnemyShip(allShips, playerShip);
+
+            PictureBox rivalPB = new PictureBox();
+            ShipFactory.CreateShip(rivalPB, enemyShip, angulo: 180, escala: 1);
+
+            mainForm.NaveRival = rivalPB;
+            contiene.Controls.Add(rivalPB);
+            rivalPB.BringToFront();
+
+            // ---------- POSICIONES ----------
             Random r = new Random();
-            int aletX_GameArea = r.Next(50, AREA_W - 50);
-            int sale = r.Next(1, 2);
+            int x = r.Next(50, AREA_W - 50);
 
-            PictureBox newNavex = new PictureBox();
-            ShipFactory.CreateShip(newNavex, 0, playerShip.ShipTypeID, playerShip.BaseColor, playerShip.InitialHealth, 1);
-            mainForm.Navex = newNavex;
-            contiene.Controls.Add(mainForm.Navex);
-            mainForm.Navex.BringToFront();
+            mainForm.Navex.Location = new Point(
+                x + offsetX,
+                AREA_H - mainForm.Navex.Height - 50 + offsetY
+            );
 
-            PictureBox newNaveRival = new PictureBox();
-            ShipFactory.CreateShip(newNaveRival, 180, sale, Color.DarkBlue, 100, 2);
-            mainForm.NaveRival = newNaveRival;
-            contiene.Controls.Add(mainForm.NaveRival);
-            mainForm.NaveRival.BringToFront();
+            mainForm.NaveRival.Location = new Point(
+                x + offsetX,
+                50 + offsetY
+            );
 
-            int naveY_Player = AREA_H - mainForm.Navex.Height - 50;
-            mainForm.Navex.Location = new Point(aletX_GameArea + offsetX, naveY_Player + offsetY);
-            mainForm.NaveRival.Location = new Point(aletX_GameArea + offsetX, 50 + offsetY);
-
+            // ---------- CORAZONES ----------
             int heartSize = 32;
-            int heartSpacing = 5;
-            int startX = 10;
+            int spacing = 5;
+            int startX = offsetX + 10;
 
-            int startYPlayer = offsetY + AREA_H - heartSize - 10;
-            int startYRival = offsetY + 10;
+            int playerY = offsetY + AREA_H - heartSize - 10;
+            int rivalY = offsetY + 10;
 
             for (int i = 0; i < 5; i++)
             {
-                PictureBox heartP = new PictureBox
+                PictureBox hp = new PictureBox
                 {
                     Size = new Size(heartSize, heartSize),
                     Image = Resources.Heart_Full,
                     SizeMode = PictureBoxSizeMode.StretchImage,
-                    BackColor = Color.Transparent
+                    BackColor = Color.Transparent,
+                    Location = new Point(startX + i * (heartSize + spacing), playerY)
                 };
-                heartP.Location = new Point(startX + (i * (heartSize + heartSpacing)) + offsetX, startYPlayer);
-                mainForm.PlayerHearts[i] = heartP;
-                contiene.Controls.Add(heartP);
-                heartP.BringToFront();
 
-                PictureBox heartR = new PictureBox
+                PictureBox hr = new PictureBox
                 {
                     Size = new Size(heartSize, heartSize),
                     Image = Resources.Heart_Full,
                     SizeMode = PictureBoxSizeMode.StretchImage,
-                    BackColor = Color.Transparent
+                    BackColor = Color.Transparent,
+                    Location = new Point(startX + i * (heartSize + spacing), rivalY)
                 };
-                heartR.Location = new Point(startX + (i * (heartSize + heartSpacing)) + offsetX, startYRival);
-                mainForm.RivalHearts[i] = heartR;
-                contiene.Controls.Add(heartR);
-                heartR.BringToFront();
+
+                mainForm.PlayerHearts[i] = hp;
+                mainForm.RivalHearts[i] = hr;
+
+                contiene.Controls.Add(hp);
+                contiene.Controls.Add(hr);
+
+                hp.BringToFront();
+                hr.BringToFront();
             }
         }
-
     }
+
 }

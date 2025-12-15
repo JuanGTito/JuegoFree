@@ -78,6 +78,8 @@
     <Compile Include="Core\GameSettings.cs" />
     <Compile Include="Core\HeartManager.cs" />
     <Compile Include="Core\InputManager.cs" />
+    <Compile Include="Core\ShipMapper.cs" />
+    <Compile Include="Core\ShipSelector.cs" />
     <Compile Include="Core\Utils.cs" />
     <Compile Include="Data\Database.cs" />
     <Compile Include="Data\ShipRepository.cs" />
@@ -99,8 +101,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Scenes\GameOverScene.cs" />
     <Compile Include="Scenes\GameScene.cs" />
     <Compile Include="Scenes\MainMenuScene.cs" />
+    <Compile Include="Scenes\WinScene.cs" />
     <Compile Include="SeleccionarJugador.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -9,5 +9,6 @@ namespace JuegoFree.Entities
         public int BaseHealth { get; set; }
         public int BaseDamage { get; set; }
         public Point[] Polygon { get; set; }
+        public string ColorHex { get; set; }
     }
 }

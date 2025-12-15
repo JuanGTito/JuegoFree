@@ -13,182 +13,70 @@ namespace JuegoFree.Entities
 {
     internal class ShipFactory
     {
-        private static Point[] myNave1 = {
-    new Point(35, 0),
-    new Point(33, 0),
-    new Point(33, 3),
-    new Point(33, 4),
-    new Point(33, 13),
-    new Point(33, 13),
-    new Point(33, 13),
-    new Point(26, 13),
-    new Point(26, 13),
-    new Point(26, 4),
-    new Point(26, 3),
-    new Point(26, 0),
-    new Point(24, 0),
-    new Point(23, 1),
-    new Point(10, 28),
-    new Point(4, 35),
-    new Point(1, 43),
-    new Point(4, 44),
-    new Point(3, 45),
-    new Point(2, 45),
-    new Point(2, 52),
-    new Point(4, 53),
-    new Point(4, 53),
-    new Point(1, 55),
-    new Point(1, 55),
-    new Point(3, 62),
-    new Point(5, 67),
-    new Point(7, 69),
-    new Point(8, 70),
-    new Point(9, 71),
-    new Point(9, 72),
-    new Point(14, 76),
-    new Point(20, 79),
-    new Point(27, 80),
-    new Point(32, 80),
-    new Point(38, 79),
-    new Point(44, 76),
-    new Point(48, 74),
-    new Point(50, 72),
-    new Point(50, 71),
-    new Point(51, 70),
-    new Point(52, 69),
-    new Point(55, 65),
-    new Point(57, 60),
-    new Point(59, 55),
-    new Point(55, 53),
-    new Point(55, 53),
-    new Point(58, 52),
-    new Point(58, 45),
-    new Point(56, 45),
-    new Point(56, 44),
-    new Point(58, 43),
-    new Point(56, 38),
-    new Point(59, 33),
-    new Point(59, 29),
-    new Point(58, 24),
-    new Point(56, 24),
-    new Point(53, 24),
-    new Point(51, 29),
-    new Point(51, 29),
-    new Point(49, 26),
-    new Point(37, 1)
-};
 
-        private static Point[] myNave1_Cabina = {
-        new Point(28, 5), new Point(32, 5), new Point(32, 20), new Point(28, 20)
-    };
-
-        private static Point[] myNave1_MotorLuz = {
-        new Point(20, 75), new Point(40, 75), new Point(40, 80), new Point(20, 80)
-    };
-
-        //private static Point[] myNave2 = {/*.......*/ };
-        private static Point[] myNave2 = {
-    new Point(19, 0), new Point(14, 23), new Point(14, 23), new Point(11, 37), new Point(10, 37),
-    new Point(9, 41), new Point(9, 43), new Point(9, 43), new Point(8, 45), new Point(8, 45),
-    new Point(9, 43), new Point(9, 42), new Point(9, 41), new Point(10, 37), new Point(11, 36),
-    new Point(12, 30), new Point(15, 15), new Point(13, 22), new Point(14, 24), new Point(10, 36),
-    new Point(10, 37), new Point(9, 41), new Point(9, 43), new Point(8, 44), new Point(7, 46),
-    new Point(1, 50), new Point(0, 55), new Point(5, 58), new Point(4, 60), new Point(4, 62),
-    new Point(4, 62), new Point(0, 74), new Point(4, 73), new Point(8, 69), new Point(8, 68),
-    new Point(10, 66), new Point(11, 65), new Point(11, 65), new Point(14, 65), new Point(14, 64),
-    new Point(15, 65), new Point(15, 65), new Point(15, 65), new Point(15, 66), new Point(17, 79),
-    new Point(19, 80), new Point(21, 79), new Point(23, 66), new Point(23, 65), new Point(23, 65),
-    new Point(24, 65), new Point(24, 64), new Point(25, 65), new Point(27, 65), new Point(28, 65),
-    new Point(28, 66), new Point(30, 68), new Point(31, 69), new Point(34, 73), new Point(38, 74),
-    new Point(35, 62), new Point(34, 62), new Point(34, 60), new Point(34, 58), new Point(36, 56),
-    new Point(36, 56), new Point(38, 55), new Point(38, 54), new Point(37, 50), new Point(31, 46),
-    new Point(30, 44), new Point(29, 43), new Point(29, 41), new Point(28, 37), new Point(28, 35),
-    new Point(25, 24), new Point(25, 22), new Point(23, 15), new Point(25, 23), new Point(25, 24),
-    new Point(28, 36), new Point(28, 37), new Point(29, 41), new Point(29, 42), new Point(30, 43),
-    new Point(30, 45), new Point(30, 45), new Point(29, 43), new Point(29, 42), new Point(29, 42),
-    new Point(28, 37), new Point(28, 37), new Point(24, 23), new Point(25, 23)
-};
-
-        private static Point[] myNave3 = {/*.......*/ };
-
-        public static void CreateShip(PictureBox Avion, int AngRotar, int Tipox, Color Pintar, int Vida, int escala = 1)
+        public static void CreateShip(
+            PictureBox avion,
+            ShipConfiguration ship,
+            int angulo = 0,
+            int escala = 1)
         {
-            int largoBase = 1;
-            int anchoBase = 1;
-            Point[] selectedNavePoints = null;
-
-            if (Tipox == 1)
-            {
-                largoBase = 80;
-                anchoBase = 69;
-                selectedNavePoints = myNave1;
-            }
-            else if (Tipox == 2)
-            {
-                largoBase = 50;
-                anchoBase = 50;
-                selectedNavePoints = myNave2;
-            }
-            else if (Tipox == 3)
-            {
-                largoBase = 51;
-                anchoBase = 305;
-                selectedNavePoints = myNave3;
-            }
-
-            // Limitar la escala entre 1 y 4
             escala = Math.Max(1, Math.Min(4, escala));
 
-            // Calcular factor de escala
-            // Escala 1 = 60x80 (base reducida)
-            // Escala 4 = 200x240 (máximo)
-            float factorEscala = 0.75f + (escala - 1) * 0.5833f; // De 0.75 a 2.5
+            float factorEscala = 0.75f + (escala - 1) * 0.5833f;
 
-            int largoN = (int)(largoBase * factorEscala);
-            int anchoN = (int)(anchoBase * factorEscala);
+            Point[] scaledPoints = EscalarPuntos(
+                ship.Polygon,
+                factorEscala,
+                angulo,
+                ship.Polygon.Max(p => p.Y) + 5
+            );
 
-            Avion.Tag = Vida;
+            GraphicsPath path = new GraphicsPath();
+            path.AddPolygon(scaledPoints);
 
-            if (selectedNavePoints != null)
+            int maxX = scaledPoints.Max(p => p.X);
+            int maxY = scaledPoints.Max(p => p.Y);
+
+            avion.Size = new Size(maxX + 5, maxY + 5);
+            avion.Region = new Region(path);
+
+            Bitmap bmp = new Bitmap(avion.Width, avion.Height);
+            using (Graphics g = Graphics.FromImage(bmp))
             {
-                Point[] myNave = EscalarPuntos(selectedNavePoints, factorEscala, AngRotar, largoN);
-
-                GraphicsPath ObjGrafico = new GraphicsPath();
-                ObjGrafico.AddPolygon(myNave);
-
-                Avion.Size = new Size(anchoN, largoN);
-                Avion.Region = new Region(ObjGrafico);
-                Avion.Location = new Point(0, 0);
-
-                Bitmap Imagen = new Bitmap(Avion.Width, Avion.Height);
-                using (Graphics PintaImg = Graphics.FromImage(Imagen))
+                g.Clear(Color.Transparent);
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                using (SolidBrush brush = new SolidBrush(ship.BaseColor))
                 {
-                    PintaImg.Clear(Color.Transparent);
-                    PintaImg.SmoothingMode = SmoothingMode.AntiAlias; // Mejor calidad al escalar
-
-                    using (SolidBrush baseBrush = new SolidBrush(Pintar))
-                    {
-                        PintaImg.FillPolygon(baseBrush, myNave);
-                    }
-
-                    if (Tipox == 1)
-                    {
-                        Point[] cabinaEscalada = EscalarPuntos(myNave1_Cabina, factorEscala, AngRotar, largoN);
-                        using (SolidBrush cabinaBrush = new SolidBrush(Color.Silver))
-                        {
-                            PintaImg.FillPolygon(cabinaBrush, cabinaEscalada);
-                        }
-
-                        Point[] motorLuzEscalada = EscalarPuntos(myNave1_MotorLuz, factorEscala, AngRotar, largoN);
-                        using (SolidBrush luzBrush = new SolidBrush(Color.Orange))
-                        {
-                            PintaImg.FillPolygon(luzBrush, motorLuzEscalada);
-                        }
-                    }
+                    g.FillPolygon(brush, scaledPoints);
                 }
-                Avion.Image = Imagen;
             }
-            Avion.Visible = true;
+
+            avion.Image = bmp;
+            avion.Tag = ship.InitialHealth;
+            avion.Visible = true;
+        }
+
+
+        public static void CreateShipFromPolygon(
+            PictureBox avion,
+            Point[] polygon,
+            Color color,
+            int scale = 1)
+        {
+            GraphicsPath path = new GraphicsPath();
+            path.AddPolygon(polygon);
+
+            avion.Region = new Region(path);
+
+            Bitmap bmp = new Bitmap(avion.Width, avion.Height);
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.Clear(Color.Transparent);
+                g.FillPolygon(new SolidBrush(color), polygon);
+            }
+
+            avion.Image = bmp;
+            avion.Visible = true;
         }
 
         // Método auxiliar para escalar puntos

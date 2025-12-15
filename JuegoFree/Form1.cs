@@ -1,6 +1,7 @@
 ﻿using JuegoFree.Core;
 using JuegoFree.Entities;
 using JuegoFree.Properties;
+using JuegoFree.Scenes;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -55,10 +56,42 @@ namespace JuegoFree
         public void LoadGameScene()
         {
             // Marcamos que el juego está activo
-            IsGameActive = true;
+            IsGameActive = false;
+
+            contiene.Controls.Clear();
+            contiene.Image = null;
 
             Scenes.GameScene.Escenario(contiene, this, PlayerShip);
         }
+
+        public void RestartGame()
+        {
+            IsGameActive = false;
+
+            contiene.Controls.Clear();
+            contiene.Image = null;
+
+            // Volver a iniciar el juego con la nave seleccionada
+            GameScene.Escenario(
+                contiene,
+                this,
+                PlayerShip
+            );
+        }
+
+        public void StartGame()
+        {
+            using (var selector = new SeleccionarJugador())
+            {
+                if (selector.ShowDialog() != DialogResult.OK)
+                    return;
+
+                PlayerShip = selector.SelectedShip;
+            }
+
+            LoadGameScene();
+        }
+
 
         public void Iniciar()
         {
@@ -89,10 +122,11 @@ namespace JuegoFree
             this.KeyDown += new KeyEventHandler(TeclaPresionada);
             this.KeyUp += new KeyEventHandler(TeclaLiberada);
 
-            LoadGameScene();
+            // Inicializar la escena del juego directamente para pruebas rápidas
+            //LoadGameScene();
 
             // Cargar el Menú Principal al inicio
-            //Scenes.MainMenuScene.Load(contiene, this);
+            Scenes.MainMenuScene.Load(contiene, this);
 
             this.KeyPreview = true;
 
@@ -110,12 +144,12 @@ namespace JuegoFree
                         naveRival,
                         navex,
                         contiene,
-                        ref Dispara,
                         ref flag,
                         tiempo, // Aunque 'tiempo' no se usa aquí, si GameLoopManager lo necesita, se mantiene
                         ref angulo,
                         playerHearts,
-                        rivalHearts);
+                        rivalHearts,
+                        this);
                 }
             };
             tiempo.Start();
@@ -128,16 +162,17 @@ namespace JuegoFree
 
         private void Form1_Load_1(object sender, EventArgs e)
         {
-            using (var selector = new SeleccionarJugador())
-            {
-                if (selector.ShowDialog() != DialogResult.OK)
-                {
-                    Close(); // Si cancela, se cierra el juego
-                    return;
-                }
-
-                PlayerShip = selector.SelectedShip;
-            }
+            // Selección de nave del jugador -- comentado para pruebas rápidas
+            //using (var selector = new SeleccionarJugador())
+            //{
+            //    if (selector.ShowDialog() != DialogResult.OK)
+            //    {
+            //        Close(); // Si cancela, se cierra el juego
+            //        return;
+            //    }
+            //
+            //    PlayerShip = selector.SelectedShip;
+            //}
 
             Iniciar();
         }

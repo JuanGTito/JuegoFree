@@ -1,8 +1,8 @@
-﻿using JuegoFree.Entities;
-using JuegoFree.Utils;
+﻿using JuegoFree.Core;
+using JuegoFree.Entities;
 using MySql.Data.MySqlClient;
 using System.Collections.Generic;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
+using System.Drawing;
 
 namespace JuegoFree.Data
 {
@@ -17,6 +17,7 @@ namespace JuegoFree.Data
                 conn.Open();
 
                 string query = "SELECT * FROM ships";
+
                 using (var cmd = new MySqlCommand(query, conn))
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -28,8 +29,9 @@ namespace JuegoFree.Data
                             Name = reader.GetString("name"),
                             BaseHealth = reader.GetInt32("base_health"),
                             BaseDamage = reader.GetInt32("base_damage"),
-                            Polygon = PolygonParser.Parse(
-                                reader.GetString("polygon_points"))
+                            Polygon = Utils.PolygonParser.Parse(
+                                reader.GetString("polygon_points")),
+                            ColorHex = reader.GetString("color_hex")
                         });
                     }
                 }

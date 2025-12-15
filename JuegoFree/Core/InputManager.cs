@@ -14,7 +14,7 @@ namespace JuegoFree.Core
 
         private const int BURST_MAX_SIZE = 10;
         private const int BURST_SHOT_TICK_RATE = 3;
-        private const int BURST_RECHARGE_TICKS = 10000;
+        private const int BURST_RECHARGE_TICKS = 60;
 
         private static int _shotsInCurrentBurst = BURST_MAX_SIZE;
         private static int _burstCooldownTimer = 0;

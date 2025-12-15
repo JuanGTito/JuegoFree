@@ -5,7 +5,7 @@ namespace JuegoFree.Data
     public static class Database
     {
         private static string connectionString =
-            "server=localhost;database=juegofree;uid=root;pwd=admin;";
+            "server=localhost;port=3307;database=juegofree;uid=root;pwd=admin;";
 
         public static MySqlConnection GetConnection()
         {

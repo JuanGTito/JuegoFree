@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using JuegoFree.Entities;
+using JuegoFree.Data;
+using JuegoFree.Core;
 
 namespace JuegoFree
 {
@@ -9,111 +13,115 @@ namespace JuegoFree
     {
         public ShipConfiguration SelectedShip { get; private set; }
 
+        private List<ShipEntity> ships;
+
         private PictureBox previewPictureBox;
         private Label statsLabel;
-        private Button btnType1;
-        private Button btnType2;
-        private Button btnType3;
+        private ListBox listBoxShips;
         private Button btnIniciarJuego;
 
         public SeleccionarJugador()
         {
             InitializeComponent();
             CreateUI();
-            UpdateShipSelection(1);
+            LoadShips();
         }
 
-        // ---------------- UI POR CÓDIGO ----------------
+        // ---------------- UI ----------------
         private void CreateUI()
         {
-            this.Text = "Seleccionar Nave";
-            this.Size = new Size(520, 380);
-            this.FormBorderStyle = FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
+            Text = "Seleccionar Nave";
+            Size = new Size(520, 360);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            BackColor = Color.FromArgb(25, 25, 25);
 
             previewPictureBox = new PictureBox
             {
                 Size = new Size(160, 200),
                 Location = new Point(20, 20),
-                BackColor = Color.Black,
-                SizeMode = PictureBoxSizeMode.CenterImage
+                BackColor = Color.Black
             };
 
             statsLabel = new Label
             {
-                Location = new Point(200, 30),
-                Size = new Size(280, 120),
-                Font = new Font("Consolas", 10f),
+                Location = new Point(200, 20),
+                Size = new Size(280, 100),
                 ForeColor = Color.White,
-                BackColor = Color.Transparent
+                Font = new Font("Consolas", 10f)
             };
 
-            btnType1 = new Button
+            listBoxShips = new ListBox
             {
-                Text = "Fighter",
-                Location = new Point(200, 160),
-                Width = 90
+                Location = new Point(200, 130),
+                Size = new Size(280, 80)
             };
-            btnType1.Click += (s, e) => UpdateShipSelection(1);
-
-            btnType2 = new Button
-            {
-                Text = "Cruiser",
-                Location = new Point(300, 160),
-                Width = 90
-            };
-            btnType2.Click += (s, e) => UpdateShipSelection(2);
-
-            btnType3 = new Button
-            {
-                Text = "Scout",
-                Location = new Point(400, 160),
-                Width = 90
-            };
-            btnType3.Click += (s, e) => UpdateShipSelection(3);
+            listBoxShips.SelectedIndexChanged += ListBoxShips_SelectedIndexChanged;
 
             btnIniciarJuego = new Button
             {
                 Text = "Iniciar Juego",
-                Location = new Point(200, 220),
-                Width = 200
+                Location = new Point(200, 230),
+                Size = new Size(280, 40)
             };
             btnIniciarJuego.Click += BtnIniciarJuego_Click;
 
-            this.Controls.Add(previewPictureBox);
-            this.Controls.Add(statsLabel);
-            this.Controls.Add(btnType1);
-            this.Controls.Add(btnType2);
-            this.Controls.Add(btnType3);
-            this.Controls.Add(btnIniciarJuego);
-
-            this.BackColor = Color.FromArgb(25, 25, 25);
+            Controls.Add(previewPictureBox);
+            Controls.Add(statsLabel);
+            Controls.Add(listBoxShips);
+            Controls.Add(btnIniciarJuego);
         }
 
-        // ---------------- LÓGICA ----------------
-        private void UpdateShipSelection(int shipID)
+        // ---------------- DATOS ----------------
+        private void LoadShips()
         {
-            SelectedShip = ShipCatalog.GetShip(shipID);
+            ships = ShipRepository.GetAllShips();
 
-            statsLabel.Text =
-                $"Nave: {SelectedShip.Name}\n" +
-                $"Vida: {SelectedShip.InitialHealth}\n" +
-                $"Daño Base: {SelectedShip.BaseDamage}\n" +
-                $"Multiplicador: x{SelectedShip.DamageMultiplier:0.0}";
+            if (ships.Count == 0) return;
 
+            listBoxShips.DataSource = ships;
+            listBoxShips.DisplayMember = "Name";
+            listBoxShips.SelectedIndex = 0;
+        }
+
+        private void ListBoxShips_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (listBoxShips.SelectedItem is ShipEntity entity)
+            {
+                // Color temporal (luego puede venir de BD)
+                Color baseColor = Color.CornflowerBlue;
+
+                SelectedShip = ShipMapper.FromEntity(entity);
+
+                UpdatePreview();
+                UpdateStats();
+            }
+        }
+
+        // ---------------- VISUAL ----------------
+        private void UpdatePreview()
+        {
             previewPictureBox.Image?.Dispose();
             previewPictureBox.Image = null;
 
+            // Usamos EXACTAMENTE el ShipFactory (preview = juego)
             ShipFactory.CreateShip(
                 previewPictureBox,
-                0,
-                SelectedShip.ShipTypeID,
-                SelectedShip.BaseColor,
-                SelectedShip.InitialHealth,
-                2
+                SelectedShip,
+                angulo: 0,
+                escala: 2
             );
         }
 
+        private void UpdateStats()
+        {
+            statsLabel.Text =
+                $"Nave: {SelectedShip.Name}\n" +
+                $"Vida: {SelectedShip.InitialHealth}\n" +
+                $"Daño Base: {SelectedShip.BaseDamage}";
+        }
+
+        // ---------------- ACCIÓN ----------------
         private void BtnIniciarJuego_Click(object sender, EventArgs e)
         {
             if (SelectedShip == null) return;

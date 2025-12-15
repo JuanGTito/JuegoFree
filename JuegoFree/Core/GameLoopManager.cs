@@ -1,14 +1,15 @@
 ﻿using JuegoFree.Entities;
+using JuegoFree.Scenes;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static JuegoFree.Core.Utils;
 using TimerForms = System.Windows.Forms.Timer;
-using JuegoFree.Scenes;
 
 namespace JuegoFree.Core
 {
@@ -23,16 +24,32 @@ namespace JuegoFree.Core
         private const string ASTEROIDE_NAME_PREFIX = "ASTEROIDE_";
         private const int ASTEROID_SPAWN_RATE = 100;
         private static int asteroidSpawnTimer = 0;
+
+        private static int rivalBurstCounter = 0;       // Contador de misiles disparados en la ráfaga
+        private static int rivalBurstTick = 0;
+        private static int rivalCooldown = 0;           
+        private const int RIVAL_BURST_MISSILES = 10;   // Total de misiles en la ráfaga
+        private const int RIVAL_BURST_INTERVAL = 4;    // Cada 2 ticks disparar un misil (~40ms)
+        private const int RIVAL_COOLDOWN_TICKS = 50;   // 1 segundo de espera entre ráfagas
+
+        private static readonly SoundPlayer rivalShootSound = new SoundPlayer(
+            @"C:\Users\juang\source\repos\JuanGTito\JuegoFree\JuegoFree\sond\disparo.wav"
+        );
+
+        public static void InitializeSounds()
+        {
+            rivalShootSound.Load(); // Carga el archivo en memoria
+        }
         public static void HandleGameTick(
             PictureBox naveRival,
             PictureBox navex,
             PictureBox contiene,
-            ref int Dispara,
             ref bool flag,
             TimerForms tiempo,
             ref float angulo,
             PictureBox[] playerHearts,
-            PictureBox[] rivalHearts)
+            PictureBox[] rivalHearts,
+            Form1 mainForm)
         {
 
             InputManager.ProcessGameLogic(navex, contiene, tiempo, ref angulo);
@@ -58,17 +75,45 @@ namespace JuegoFree.Core
 
             SpawnAsteroids(contiene, offsetX, GAME_W);
 
-            Dispara++;
-
-            if (Dispara == 15 && naveRival.Visible == true)
+            // Si el rival está visible
+            if (naveRival.Visible)
             {
-                int xRival = naveRival.Location.X + (naveRival.Width / 2);
-                int yRival = naveRival.Location.Y + (naveRival.Height / 2);
+                if (rivalBurstCounter > 0) // Estamos en medio de una ráfaga
+                {
+                    rivalBurstTick++;
 
-                MissileFactory.CreateMisil(contiene, 180, Color.OrangeRed, "Rival", xRival, yRival);
+                    if (rivalBurstTick >= RIVAL_BURST_INTERVAL)
+                    {
+                        rivalBurstTick = 0;
 
-                Dispara = 0;
+                        int xRival = naveRival.Location.X + (naveRival.Width / 2);
+                        int yRival = naveRival.Location.Y + (naveRival.Height / 2);
+                        Console.WriteLine("Disparo de misil rival"); // <-- prueba
+                        MissileFactory.CreateMisil(contiene, 180, Color.OrangeRed, "Rival", xRival, yRival);
+
+                        rivalShootSound.Play();
+
+                        rivalBurstCounter--;
+
+                        if (rivalBurstCounter == 0)
+                            rivalCooldown = RIVAL_COOLDOWN_TICKS; // Preparar cooldown
+                    }
+                }
+                else
+                {
+                    // Si no estamos disparando, contar cooldown
+                    if (rivalCooldown > 0)
+                    {
+                        rivalCooldown--;
+                    }
+                    else
+                    {
+                        // Iniciar nueva ráfaga
+                        rivalBurstCounter = RIVAL_BURST_MISSILES;
+                    }
+                }
             }
+
 
             int minX_Boundary = offsetX;
             int maxX_Boundary = offsetX + GAME_W - naveRival.Width;
@@ -222,21 +267,20 @@ namespace JuegoFree.Core
                     }
                 }
 
+                if (!mainForm.IsGameActive)
+                    return;
+
                 // Finalización del juego (Victoria del jugador)
-                if (naveRival.Tag != null && int.Parse(naveRival.Tag.ToString()) <= 0)
-                {
-                    naveRival.Dispose();
-                    Bitmap NuevoImg = new Bitmap(contiene.Width, contiene.Height);
-                    using (Graphics flagImagen = Graphics.FromImage(NuevoImg))
+                if(naveRival.Tag != null)
+{
+                    int vidaRival = (int)naveRival.Tag;
+
+                    if (vidaRival <= 0)
                     {
-                        String drawString = "Felicidades Ganaste...";
-                        Font drawFont = new Font("Arial", 16);
-                        SolidBrush drawBrush = new SolidBrush(Color.Blue);
-                        flagImagen.DrawString(drawString, drawFont, drawBrush, new Point(40, 150));
+                        mainForm.IsGameActive = false;
+                        WinScene.Show(contiene, mainForm);
+                        return;
                     }
-                    contiene.Image = NuevoImg;
-                    tiempo.Stop();
-                    break;
                 }
 
                 // ACTIVIDAD DE IMPACTO CON MI NAVE (Misil del rival golpea)
@@ -252,20 +296,16 @@ namespace JuegoFree.Core
                 }
 
                 // Finalización del juego (Derrota del jugador)
-                if (navex.Tag != null && int.Parse(navex.Tag.ToString()) <= 0)
+                if (navex.Tag != null)
                 {
-                    navex.Dispose();
-                    Bitmap NuevoImg = new Bitmap(contiene.Width, contiene.Height);
-                    using (Graphics flagImagen = Graphics.FromImage(NuevoImg))
+                    int vidaJugador = (int)navex.Tag;
+
+                    if (vidaJugador <= 0)
                     {
-                        String drawString = "Perdiste el Juego";
-                        Font drawFont = new Font("Arial", 16);
-                        SolidBrush drawBrush = new SolidBrush(Color.Red);
-                        flagImagen.DrawString(drawString, drawFont, drawBrush, new Point(40, 150));
+                        mainForm.IsGameActive = false;
+                        GameOverScene.Show(contiene, mainForm);
+                        return;
                     }
-                    contiene.Image = NuevoImg;
-                    tiempo.Stop();
-                    break;
                 }
 
                 if (nombre != null && nombre.StartsWith(ASTEROIDE_NAME_PREFIX))
@@ -339,10 +379,9 @@ namespace JuegoFree.Core
                     Y + H - PADDING > Y2 + PADDING;
                 if (navesColisionan)
                 {
-                    naveRival.Dispose();
-                    navex.Dispose();
-                    tiempo.Stop(); // Detener el juego en colisión fatal ---- llevara al game over
-                    break;
+                    mainForm.IsGameActive = false;
+                    GameOverScene.Show(contiene, mainForm);
+                    return;
                 }
             }
         }
