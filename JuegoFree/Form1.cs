@@ -25,6 +25,8 @@ namespace JuegoFree
         public PictureBox[] RivalHearts => rivalHearts;
         public bool IsGameActive { get; set; } = false;
 
+        public ShipConfiguration PlayerShip { get; private set; }
+
         private PictureBox[] playerHearts = new PictureBox[5];
         private PictureBox[] rivalHearts = new PictureBox[5];
         private const int FULL_HEART_VALUE = 20;
@@ -55,7 +57,7 @@ namespace JuegoFree
             // Marcamos que el juego está activo
             IsGameActive = true;
 
-            Scenes.GameScene.Escenario(contiene, this, 1);
+            Scenes.GameScene.Escenario(contiene, this, PlayerShip);
         }
 
         public void Iniciar()
@@ -126,6 +128,17 @@ namespace JuegoFree
 
         private void Form1_Load_1(object sender, EventArgs e)
         {
+            using (var selector = new SeleccionarJugador())
+            {
+                if (selector.ShowDialog() != DialogResult.OK)
+                {
+                    Close(); // Si cancela, se cierra el juego
+                    return;
+                }
+
+                PlayerShip = selector.SelectedShip;
+            }
+
             Iniciar();
         }
     }

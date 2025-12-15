@@ -24,5 +24,24 @@ namespace JuegoFree.Core
             return bmp;
         }
 
+        public static class PolygonParser
+        {
+            public static Point[] Parse(string data)
+            {
+                string[] pairs = data.Split(';');
+                Point[] points = new Point[pairs.Length];
+
+                for (int i = 0; i < pairs.Length; i++)
+                {
+                    string[] xy = pairs[i].Split(',');
+                    int x = int.Parse(xy[0]);
+                    int y = int.Parse(xy[1]);
+                    points[i] = new Point(x, y);
+                }
+
+                return points;
+            }
+        }
+
     }
 }

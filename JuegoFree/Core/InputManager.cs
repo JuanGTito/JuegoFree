@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
+using TimerForms = System.Windows.Forms.Timer;
 
 namespace JuegoFree.Core
 {
@@ -11,10 +12,13 @@ namespace JuegoFree.Core
     {
         private static readonly HashSet<Keys> _currentKeys = new HashSet<Keys>();
 
-        private static readonly Stopwatch _stopwatch = new Stopwatch();
+        private const int BURST_MAX_SIZE = 10;
+        private const int BURST_SHOT_TICK_RATE = 3;
+        private const int BURST_RECHARGE_TICKS = 10000;
 
-        private const long FIRE_RATE_MS = 250;
-        private static long _lastShotTime = 0;
+        private static int _shotsInCurrentBurst = BURST_MAX_SIZE;
+        private static int _burstCooldownTimer = 0;
+        private static int _shotTickCounter = 0;
 
         private const int GAME_W = GameSettings.GAME_WIDTH;
         private const int GAME_H = GameSettings.GAME_HEIGHT;
@@ -27,7 +31,6 @@ namespace JuegoFree.Core
 
         static InputManager()
         {
-            _stopwatch.Start();
         }
 
         public static ISet<Keys> CurrentKeys => _currentKeys;
@@ -45,7 +48,7 @@ namespace JuegoFree.Core
         public static void ProcessGameLogic(
             PictureBox shipPictureBox,
             PictureBox container,
-            Timer gameTimer,
+            TimerForms gameTimer,
             ref float angle)
         {
             angle = 0;
@@ -61,9 +64,27 @@ namespace JuegoFree.Core
 
             ApplyShipEffect(shipPictureBox, (int)angle);
 
+            if (_burstCooldownTimer > 0)
+            {
+                _burstCooldownTimer--;
+            }
+
+            if (_shotTickCounter > 0)
+            {
+                _shotTickCounter--;
+            }
+
             if (_currentKeys.Contains(Keys.Enter))
             {
-                Fire(shipPictureBox, container, gameTimer);
+                if (_burstCooldownTimer == 0)
+                {
+                    Fire(shipPictureBox, container);
+                }
+            }
+
+            if (!_currentKeys.Contains(Keys.Enter) && _shotsInCurrentBurst < BURST_MAX_SIZE && _burstCooldownTimer == 0)
+            {
+                _shotsInCurrentBurst = BURST_MAX_SIZE;
             }
         }
 
@@ -126,16 +147,14 @@ namespace JuegoFree.Core
             }
         }
 
-        private static void Fire(PictureBox shipPictureBox, PictureBox container, Timer gameTimer)
+        private static void Fire(PictureBox shipPictureBox, PictureBox container)
         {
-            long currentTime = _stopwatch.ElapsedMilliseconds;
-            long timeSinceLastShot = currentTime - _lastShotTime;
-
-            if (timeSinceLastShot >= FIRE_RATE_MS)
+            if (_shotsInCurrentBurst > 0 && _shotTickCounter == 0)
             {
-                if (!gameTimer.Enabled)
+                Color projectileColor = Color.DarkMagenta;
+                if (int.TryParse(shipPictureBox.Name, out int argb))
                 {
-                    gameTimer.Start();
+                    projectileColor = Color.FromArgb(argb);
                 }
 
                 int x = shipPictureBox.Left + (shipPictureBox.Width / 2);
@@ -144,13 +163,20 @@ namespace JuegoFree.Core
                 MissileFactory.CreateMisil(
                     container,
                     0,
-                    Color.DarkMagenta,
+                    projectileColor,
                     "Misil",
                     x,
                     y
                 );
 
-                _lastShotTime = currentTime;
+                _shotsInCurrentBurst--;
+
+                _shotTickCounter = BURST_SHOT_TICK_RATE;
+
+                if (_shotsInCurrentBurst == 0)
+                {
+                    _burstCooldownTimer = BURST_RECHARGE_TICKS;
+                }
             }
         }
     }

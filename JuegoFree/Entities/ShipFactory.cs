@@ -86,7 +86,28 @@ namespace JuegoFree.Entities
         new Point(20, 75), new Point(40, 75), new Point(40, 80), new Point(20, 80)
     };
 
-        private static Point[] myNave2 = {/*.......*/ };
+        //private static Point[] myNave2 = {/*.......*/ };
+        private static Point[] myNave2 = {
+    new Point(19, 0), new Point(14, 23), new Point(14, 23), new Point(11, 37), new Point(10, 37),
+    new Point(9, 41), new Point(9, 43), new Point(9, 43), new Point(8, 45), new Point(8, 45),
+    new Point(9, 43), new Point(9, 42), new Point(9, 41), new Point(10, 37), new Point(11, 36),
+    new Point(12, 30), new Point(15, 15), new Point(13, 22), new Point(14, 24), new Point(10, 36),
+    new Point(10, 37), new Point(9, 41), new Point(9, 43), new Point(8, 44), new Point(7, 46),
+    new Point(1, 50), new Point(0, 55), new Point(5, 58), new Point(4, 60), new Point(4, 62),
+    new Point(4, 62), new Point(0, 74), new Point(4, 73), new Point(8, 69), new Point(8, 68),
+    new Point(10, 66), new Point(11, 65), new Point(11, 65), new Point(14, 65), new Point(14, 64),
+    new Point(15, 65), new Point(15, 65), new Point(15, 65), new Point(15, 66), new Point(17, 79),
+    new Point(19, 80), new Point(21, 79), new Point(23, 66), new Point(23, 65), new Point(23, 65),
+    new Point(24, 65), new Point(24, 64), new Point(25, 65), new Point(27, 65), new Point(28, 65),
+    new Point(28, 66), new Point(30, 68), new Point(31, 69), new Point(34, 73), new Point(38, 74),
+    new Point(35, 62), new Point(34, 62), new Point(34, 60), new Point(34, 58), new Point(36, 56),
+    new Point(36, 56), new Point(38, 55), new Point(38, 54), new Point(37, 50), new Point(31, 46),
+    new Point(30, 44), new Point(29, 43), new Point(29, 41), new Point(28, 37), new Point(28, 35),
+    new Point(25, 24), new Point(25, 22), new Point(23, 15), new Point(25, 23), new Point(25, 24),
+    new Point(28, 36), new Point(28, 37), new Point(29, 41), new Point(29, 42), new Point(30, 43),
+    new Point(30, 45), new Point(30, 45), new Point(29, 43), new Point(29, 42), new Point(29, 42),
+    new Point(28, 37), new Point(28, 37), new Point(24, 23), new Point(25, 23)
+};
 
         private static Point[] myNave3 = {/*.......*/ };
 

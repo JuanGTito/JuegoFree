@@ -10,7 +10,7 @@ namespace JuegoFree.Scenes
 {
     public static class GameScene
     {
-        public static void Escenario(PictureBox contiene, Form1 mainForm, int tipo)
+        public static void Escenario(PictureBox contiene, Form1 mainForm, ShipConfiguration playerShip)
         {
             contiene.Controls.Clear();
             mainForm.IsGameActive = true;
@@ -38,7 +38,7 @@ namespace JuegoFree.Scenes
                 g.FillRectangle(new SolidBrush(Color.DarkBlue), offsetX, offsetY, AREA_W, AREA_H);
             }
 
-            if (tipo == 1)
+            if (playerShip.ShipTypeID == 1)
             {
                 g.FillRectangle(new SolidBrush(Color.DarkGray), offsetX, offsetY + AREA_H - 50, AREA_W, 5);
             }
@@ -51,7 +51,7 @@ namespace JuegoFree.Scenes
             int sale = r.Next(1, 2);
 
             PictureBox newNavex = new PictureBox();
-            ShipFactory.CreateShip(newNavex, 0, 1, Color.SeaGreen, 100, 1);
+            ShipFactory.CreateShip(newNavex, 0, playerShip.ShipTypeID, playerShip.BaseColor, playerShip.InitialHealth, 1);
             mainForm.Navex = newNavex;
             contiene.Controls.Add(mainForm.Navex);
             mainForm.Navex.BringToFront();
