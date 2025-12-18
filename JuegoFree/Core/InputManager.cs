@@ -135,15 +135,15 @@ namespace JuegoFree.Core
 
             if (isMovingHorizontal)
             {
-                ShipFactory.ShipRun(shipPictureBox, angle, 0);
+                CrearAvion.ShipRun(shipPictureBox, angle, 0);
             }
             else if (isMovingVertical)
             {
-                ShipFactory.ShipRun(shipPictureBox, 0, 1);
+                CrearAvion.ShipRun(shipPictureBox, 0, 1);
             }
             else
             {
-                ShipFactory.ShipRun(shipPictureBox, 0, 0);
+                CrearAvion.ShipRun(shipPictureBox, 0, 0);
             }
         }
 

@@ -83,11 +83,12 @@
     <Compile Include="Core\Utils.cs" />
     <Compile Include="Data\Database.cs" />
     <Compile Include="Data\ShipRepository.cs" />
+    <Compile Include="Entities\Asteroide.cs" />
     <Compile Include="Entities\AsteroidFactory.cs" />
     <Compile Include="Entities\MissileFactory.cs" />
     <Compile Include="Entities\ShipConfiguration.cs" />
-    <Compile Include="Entities\ShipEntity.cs" />
-    <Compile Include="Entities\ShipFactory.cs" />
+    <Compile Include="Entities\Avion.cs" />
+    <Compile Include="Entities\CrearAvion.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -27,6 +27,7 @@ namespace JuegoFree
         public bool IsGameActive { get; set; } = false;
 
         public ShipConfiguration PlayerShip { get; private set; }
+        public int CurrentPlayerDamage { get; set; }
 
         private PictureBox[] playerHearts = new PictureBox[5];
         private PictureBox[] rivalHearts = new PictureBox[5];
@@ -92,6 +93,11 @@ namespace JuegoFree
             LoadGameScene();
         }
 
+        public void LoadMainMenu()
+        {
+            Scenes.MainMenuScene.Load(contiene, this);
+        }
+
 
         public void Iniciar()
         {
@@ -100,12 +106,29 @@ namespace JuegoFree
             GameSettings.CurrentScreenWidth = screenW;
             GameSettings.CurrentScreenHeight = screenH;
 
-            this.Width = 1200;
-            this.Height = 900;
+            this.FormBorderStyle = FormBorderStyle.None;
+
+            // 2. Establecer el estado a maximizado
+            this.WindowState = FormWindowState.Maximized;
+
+            // 3. (Opcional) Forzar el tamaño al área total del monitor
+            this.Bounds = Screen.PrimaryScreen.Bounds;
+
+            // Guardar dimensiones en tus GameSettings
+            GameSettings.CurrentScreenWidth = this.Width;
+            GameSettings.CurrentScreenHeight = this.Height;
             this.Text = "JUEGO DE AVIONES";
 
+            contiene.Size = new Size(this.ClientSize.Width, this.ClientSize.Height);
+            contiene.Location = new Point(0, 0);
+            contiene.BackColor = Color.Black;
+            contiene.Visible = true;
+
+            if (!Controls.Contains(contiene))
+                Controls.Add(contiene);
+
             this.FormBorderStyle = FormBorderStyle.Sizable;
-            this.WindowState = FormWindowState.Normal;
+            this.WindowState = FormWindowState.Maximized;
             this.StartPosition = FormStartPosition.CenterScreen;
 
             int currentW = this.ClientSize.Width;

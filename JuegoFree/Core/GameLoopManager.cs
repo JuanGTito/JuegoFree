@@ -91,7 +91,7 @@ namespace JuegoFree.Core
                         Console.WriteLine("Disparo de misil rival"); // <-- prueba
                         MissileFactory.CreateMisil(contiene, 180, Color.OrangeRed, "Rival", xRival, yRival);
 
-                        rivalShootSound.Play();
+                        //rivalShootSound.Play();
 
                         rivalBurstCounter--;
 
@@ -175,24 +175,9 @@ namespace JuegoFree.Core
                 }
 
                 // --- 1. LÓGICA DE MOVIMIENTO (CORREGIDA) ---
-                if (nombre == "Misil")
-                {
-                    c.Top -= 10;
-                }
-                else if (nombre == "Rival")
-                {
-                    c.Top += 10;
-                }
-                // Si el Name del PictureBox se configura como "ASTEROIDE_1", "ASTEROIDE_2", etc.
-                else if (nombre != null && nombre.StartsWith(ASTEROIDE_NAME_PREFIX))
-                {
-                    int nuevaX = c.Location.X + 1;
-                    int nuevaY = c.Location.Y + 3;
-                    int asteroide_minX = offsetX;
-                    int asteroide_maxX = offsetX + GAME_W - c.Width;
-                    nuevaX = Math.Max(asteroide_minX, Math.Min(nuevaX, asteroide_maxX));
-                    c.Location = new Point(c.Location.X + 1, c.Location.Y + 3);
-                }
+                if (nombre == "Misil") c.Top -= 12;
+                else if (nombre == "Rival") c.Top += 8;
+                else if (nombre != null && nombre.StartsWith(ASTEROIDE_NAME_PREFIX)) c.Top += 4;
 
 
                 // ACTIVIDAD DE IMPACTO CON LA NAVE RIVAL (Misil del jugador golpea)
@@ -200,11 +185,19 @@ namespace JuegoFree.Core
                 {
                     c.Dispose();
                     // Lógica de daño
-                    int daño = (X + PH < X1 && X1 + W1 < X + W - PH) ? 10 : 1;
-                    int vidaActualRival = (int)naveRival.Tag;
-                    vidaActualRival -= daño;
-                    naveRival.Tag = vidaActualRival;
-                    HeartManager.UpdateHearts(rivalHearts, vidaActualRival);
+                    if (naveRival.Tag is int vidaActualRival)
+                    {
+                        vidaActualRival -= mainForm.CurrentPlayerDamage;
+                        naveRival.Tag = vidaActualRival;
+                        HeartManager.UpdateHearts(rivalHearts, vidaActualRival);
+
+                        if (vidaActualRival <= 0)
+                        {
+                            mainForm.IsGameActive = false;
+                            WinScene.Show(contiene, mainForm);
+                            return;
+                        }
+                    }
                 }
 
                 if (nombre != null && nombre.StartsWith("Asteroide"))
@@ -239,30 +232,6 @@ namespace JuegoFree.Core
                                 // Opcional: Crear una explosión o generar asteroides más pequeños aquí
                             }
                             break; // Salir del bucle de misiles después de un impacto
-                        }
-                    }
-                }
-
-                if (nombre != null && nombre.StartsWith("Asteroide"))
-                {
-                    // Asteroide (c) vs Nave Jugador (navex)
-                    if (c.Bounds.IntersectsWith(navex.Bounds))
-                    {
-                        c.Dispose(); // Destruir asteroide
-
-                        // Lógica de daño al jugador
-                        int danoColision = 20; // Daño fijo por colisión con asteroide
-                        int vidaActualJugador = (int)navex.Tag;
-                        vidaActualJugador -= danoColision;
-                        navex.Tag = vidaActualJugador;
-                        HeartManager.UpdateHearts(playerHearts, vidaActualJugador);
-
-                        // Finalización del juego (Derrota del jugador por colisión)
-                        if (vidaActualJugador <= 0)
-                        {
-                            navex.Dispose();
-                            // ... (Lógica de Game Over) ...
-                            // La lógica de Game Over ya está más abajo, solo asegúrate de que se dispare
                         }
                     }
                 }

@@ -11,24 +11,24 @@ using JuegoFree.Properties;
 
 namespace JuegoFree.Entities
 {
-    internal class ShipFactory
+    internal class CrearAvion
     {
 
         public static void CreateShip(
             PictureBox avion,
             ShipConfiguration ship,
             int angulo = 0,
-            int escala = 1)
+            float escala = 1)
         {
             escala = Math.Max(1, Math.Min(4, escala));
 
             float factorEscala = 0.75f + (escala - 1) * 0.5833f;
 
             Point[] scaledPoints = EscalarPuntos(
-                ship.Polygon,
+                ship.Poligono,
                 factorEscala,
                 angulo,
-                ship.Polygon.Max(p => p.Y) + 5
+                ship.Poligono.Max(p => p.Y) + 5
             );
 
             GraphicsPath path = new GraphicsPath();
@@ -52,7 +52,7 @@ namespace JuegoFree.Entities
             }
 
             avion.Image = bmp;
-            avion.Tag = ship.InitialHealth;
+            avion.Tag = ship.Vida;
             avion.Visible = true;
         }
 

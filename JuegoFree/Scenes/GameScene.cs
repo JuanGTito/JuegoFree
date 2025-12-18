@@ -51,7 +51,7 @@ namespace JuegoFree.Scenes
 
             contiene.Image = background;
 
-            List<ShipEntity> shipEntities = ShipRepository.GetAllShips();
+            List<Avion> shipEntities = ShipRepository.GetAllShips();
             List<ShipConfiguration> allShips =
                 shipEntities
                 .Select(entity => ShipMapper.FromEntity(
@@ -61,7 +61,10 @@ namespace JuegoFree.Scenes
 
             // ---------- NAVE JUGADOR ----------
             PictureBox playerPB = new PictureBox();
-            ShipFactory.CreateShip(playerPB, playerShip, angulo: 0, escala: 1);
+            CrearAvion.CreateShip(playerPB, playerShip, angulo: 0, escala: 1);
+
+            playerPB.Tag = playerShip.Vida;
+            mainForm.CurrentPlayerDamage = playerShip.Daño;
 
             mainForm.Navex = playerPB;
             contiene.Controls.Add(playerPB);
@@ -72,7 +75,10 @@ namespace JuegoFree.Scenes
                 ShipSelector.GetRandomEnemyShip(allShips, playerShip);
 
             PictureBox rivalPB = new PictureBox();
-            ShipFactory.CreateShip(rivalPB, enemyShip, angulo: 180, escala: 1);
+            CrearAvion.CreateShip(rivalPB, enemyShip, angulo: 180, escala: 1);
+
+            rivalPB.Tag = enemyShip.Vida;
+            rivalPB.Name = "naveRival";
 
             mainForm.NaveRival = rivalPB;
             contiene.Controls.Add(rivalPB);

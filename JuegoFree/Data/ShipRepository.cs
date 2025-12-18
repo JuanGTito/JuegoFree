@@ -8,9 +8,9 @@ namespace JuegoFree.Data
 {
     public static class ShipRepository
     {
-        public static List<ShipEntity> GetAllShips()
+        public static List<Avion> GetAllShips()
         {
-            List<ShipEntity> ships = new List<ShipEntity>();
+            List<Avion> ships = new List<Avion>();
 
             using (var conn = Database.GetConnection())
             {
@@ -23,15 +23,16 @@ namespace JuegoFree.Data
                 {
                     while (reader.Read())
                     {
-                        ships.Add(new ShipEntity
+                        ships.Add(new Avion
                         {
                             Id = reader.GetInt32("id"),
-                            Name = reader.GetString("name"),
-                            BaseHealth = reader.GetInt32("base_health"),
-                            BaseDamage = reader.GetInt32("base_damage"),
-                            Polygon = Utils.PolygonParser.Parse(
-                                reader.GetString("polygon_points")),
-                            ColorHex = reader.GetString("color_hex")
+                            Nombre = reader.GetString("nombre"),
+                            Vida = reader.GetInt32("vida"),
+                            Daño = reader.GetInt32("daño"),
+                            Poligono = Utils.PolygonParser.Parse(
+                                reader.GetString("poligono_puntos")),
+                            ColorHex = reader.GetString("color_hex"),
+                            Tipo = reader.GetString("tipo")
                         });
                     }
                 }

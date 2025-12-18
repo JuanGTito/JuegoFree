@@ -5,16 +5,17 @@ namespace JuegoFree.Core
 {
     public static class ShipMapper
     {
-        public static ShipConfiguration FromEntity(ShipEntity entity)
+        public static ShipConfiguration FromEntity(Avion entity)
         {
             return new ShipConfiguration
             {
                 Id = entity.Id,
-                Name = entity.Name,
-                InitialHealth = entity.BaseHealth,
-                BaseDamage = entity.BaseDamage,
-                Polygon = entity.Polygon,
-                BaseColor = ColorTranslator.FromHtml(entity.ColorHex)
+                Nombre = entity.Nombre,
+                Vida = entity.Vida,
+                Daño = entity.Daño,
+                Poligono = entity.Poligono,
+                BaseColor = ColorTranslator.FromHtml(entity.ColorHex),
+                Tipo = entity.Tipo
             };
         }
     }

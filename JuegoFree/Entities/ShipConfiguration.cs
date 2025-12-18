@@ -3,12 +3,14 @@
 public class ShipConfiguration
 {
     public int Id { get; set; }
-    public string Name { get; set; }
+    public string Nombre { get; set; }
 
-    public int InitialHealth { get; set; }
-    public int BaseDamage { get; set; }
+    public int Vida { get; set; }
+    public int Daño { get; set; }
 
-    public Point[] Polygon { get; set; }
+    public Point[] Poligono { get; set; }
 
     public Color BaseColor { get; set; }
+
+    public string Tipo { get; set; }
 }
