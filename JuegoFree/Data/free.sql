@@ -1,0 +1,84 @@
+-- MySQL dump 10.13  Distrib 8.0.42, for Win64 (x86_64)
+--
+-- Host: localhost    Database: juegofree
+-- ------------------------------------------------------
+-- Server version	8.0.42
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `asteroides`
+--
+
+DROP TABLE IF EXISTS `asteroides`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `asteroides` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(50) NOT NULL,
+  `tipo` varchar(25) NOT NULL,
+  `daño` int NOT NULL,
+  `poligono_puntos` text NOT NULL,
+  `color_hex` varchar(25) NOT NULL,
+  `vida` int NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `asteroides`
+--
+
+LOCK TABLES `asteroides` WRITE;
+/*!40000 ALTER TABLE `asteroides` DISABLE KEYS */;
+/*!40000 ALTER TABLE `asteroides` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ships`
+--
+
+DROP TABLE IF EXISTS `ships`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ships` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(50) NOT NULL,
+  `vida` int NOT NULL,
+  `daño` int NOT NULL,
+  `poligono_puntos` text NOT NULL,
+  `color_hex` varchar(20) DEFAULT NULL,
+  `tipo` varchar(25) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ships`
+--
+
+LOCK TABLES `ships` WRITE;
+/*!40000 ALTER TABLE `ships` DISABLE KEYS */;
+INSERT INTO `ships` VALUES (1,'Halcon Milenario',200,150,'35,0;33,0;33,3;33,4;33,13;33,13;33,13;26,13;26,13;26,4;26,3;26,0;24,0;23,1;10,28;4,35;1,43;4,44;3,45;2,45;2,52;4,53;4,53;1,55;1,55;3,62;5,67;7,69;8,70;9,71;9,72;14,76;20,79;27,80;32,80;38,79;44,76;48,74;50,72;50,71;51,70;52,69;55,65;57,60;59,55;55,53;55,53;58,52;58,45;56,45;56,44;58,43;56,38;59,33;59,29;58,24;56,24;53,24;51,29;51,29;49,26;37,1','Silver','Blindado'),(2,'Prueba',200,20,'34,0;33,1;31,3;30,5;29,8;29,10;29,10;29,26;19,32;19,31;19,31;19,29;18,28;16,28;15,28;15,33;16,34;15,34;14,35;1,42;0,46;0,48;0,48;0,48;0,50;0,51;29,40;29,40;29,61;29,61;29,64;30,64;30,67;29,68;24,71;23,73;23,74;24,77;32,73;32,73;33,74;34,76;35,76;36,75;37,73;37,73;45,77;46,74;46,73;45,71;40,68;39,67;39,64;40,64;40,61;40,61;40,40;40,40;41,40;44,42;46,42;69,51;69,50;69,48;69,48;69,46;68,43;67,42;54,34;54,34;54,28;53,28;50,28;50,29;50,30;50,30;50,31;50,32;40,26;40,10;40,10;39,7;38,4;37,2;36,0','Orange','Rapido'),(3,'Avion sa',200,25,'19,0;14,23;14,23;11,37;10,37;9,41;9,43;9,43;8,45;8,45;9,43;9,42;9,41;10,37;11,36;12,30;15,15;13,22;14,24;10,36;10,37;9,41;9,43;8,44;7,46;1,50;0,55;5,58;4,60;4,62;4,62;0,74;4,73;8,69;8,68;10,66;11,65;11,65;14,65;14,64;15,65;15,65;15,65;15,66;17,79;19,80;21,79;23,66;23,65;23,65;24,65;24,64;25,65;27,65;28,65;28,66;30,68;31,69;34,73;38,74;35,62;34,62;34,60;34,58;36,56;36,56;38,55;38,54;37,50;31,46;30,44;29,43;29,41;28,37;28,35;25,24;25,22;23,15;25,23;25,24;28,36;28,37;29,41;29,42;30,43;30,45;30,45;29,43;29,42;29,42;28,37;28,37;24,23;25,23','Red','Basico');
+/*!40000 ALTER TABLE `ships` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2025-12-18  0:59:03
